@@ -10,299 +10,371 @@
 <title>工事写真帳</title>
 <style>
 :root {
-  --navy: #0d2137;
-  --navy2: #1a3a5c;
-  --blue: #2563eb;
-  --blue-light: #dbeafe;
-  --green: #16a34a;
-  --green-light: #dcfce7;
-  --orange: #ea580c;
-  --orange-light: #ffedd5;
-  --gray50: #f8fafc;
-  --gray100: #f1f5f9;
-  --gray200: #e2e8f0;
-  --gray400: #94a3b8;
-  --gray600: #475569;
-  --text: #0f172a;
-  --radius: 14px;
+  --green-dark:  #1a3a1a;
+  --green-mid:   #1e5c1e;
+  --green-board: #2d6e2d;
+  --green-light: #3a8a3a;
+  --green-pale:  #c8e6c8;
+  --board-line:  rgba(255,255,255,0.7);
+  --gold:        #d4a843;
+  --white:       #ffffff;
+  --gray200:     #e2e8f0;
+  --gray400:     #94a3b8;
+  --gray600:     #475569;
+  --text-dark:   #0f172a;
+  --radius:      12px;
+}
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body{
+  width:100%; height:100%; overflow:hidden;
+  background: var(--green-dark);
+  font-family: -apple-system,'Hiragino Sans','Yu Gothic',sans-serif;
+  color: var(--white);
+  -webkit-text-size-adjust:100%;
 }
 
-- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-html, body {
-width: 100%; height: 100%;
-overflow: hidden;
-background: #0d2137;
-font-family: -apple-system, ‘Hiragino Sans’, ‘Yu Gothic’, sans-serif;
-color: white;
--webkit-text-size-adjust: 100%;
+/* ===== SCREENS ===== */
+.screen{
+position:fixed; top:0;left:0;right:0;bottom:0;
+display:none; flex-direction:column; overflow-y:auto;
+-webkit-overflow-scrolling:touch;
 }
+.screen.active{ display:flex; }
 
-/* ======== SCREENS ======== */
-.screen {
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-display: none;
-flex-direction: column;
-overflow-y: auto;
--webkit-overflow-scrolling: touch;
-}
-.screen.active { display: flex; }
+/* ===== HOME ===== */
+#homeScreen{ background:var(–green-dark); }
 
-/* ======== HOME ======== */
-#homeScreen {
-background: var(–gray50);
-color: var(–text);
+.home-body{
+flex:1; padding:14px;
+overflow-y:auto; -webkit-overflow-scrolling:touch;
+padding-top: calc(env(safe-area-inset-top,44px) + 10px);
+padding-bottom: calc(env(safe-area-inset-bottom,0px) + 80px);
 }
 
-.home-header {
-background: var(–navy2);
-padding: env(safe-area-inset-top, 44px) 20px 18px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-flex-shrink: 0;
+/* カード */
+.card{
+background: var(–green-mid);
+border: 1px solid var(–green-light);
+border-radius: var(–radius);
+padding:16px; margin-bottom:12px;
 }
-.home-header h1 { font-size: 20px; font-weight: 700; color: white; }
-.home-header p  { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
-.history-btn-header {
-background: rgba(255,255,255,0.15);
-border: none; color: white;
-font-size: 13px; font-family: inherit;
-padding: 8px 14px; border-radius: 20px; cursor: pointer;
+.card-title{
+font-size:11px; font-weight:700; color:rgba(255,255,255,0.5);
+text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;
 }
 
-.home-body {
-flex: 1; padding: 14px;
-overflow-y: auto; -webkit-overflow-scrolling: touch;
-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+/* 入力フィールド */
+.field{ margin-bottom:12px; }
+.field:last-child{ margin-bottom:0; }
+.field label{
+display:flex; align-items:center; gap:6px;
+font-size:12px; font-weight:700; color:rgba(255,255,255,0.7); margin-bottom:6px;
+}
+.req{ color:#f87171; font-size:10px; }
+.opt{ color:rgba(255,255,255,0.35); font-size:10px; }
+.field input{
+width:100%;
+background: var(–green-dark);
+border: 1.5px solid var(–green-light);
+border-radius:10px;
+padding:12px 14px; font-size:16px;
+font-family:inherit; color:var(–white);
+outline:none; -webkit-appearance:none; appearance:none;
+}
+.field input:focus{ border-color: var(–gold); }
+.field input::placeholder{ color:rgba(255,255,255,0.3); }
+
+/* ステータス */
+.status-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.status-opt{
+padding:11px 4px; border-radius:10px;
+border:2px solid rgba(255,255,255,0.2);
+background: var(–green-dark);
+font-size:13px; font-weight:700; font-family:inherit;
+color:rgba(255,255,255,0.5); cursor:pointer; text-align:center;
+}
+.status-opt.sel-mae{ border-color:#60a5fa; background:rgba(37,99,235,0.25); color:#93c5fd; }
+.status-opt.sel-chu{ border-color:#fb923c; background:rgba(234,88,12,0.25); color:#fdba74; }
+.status-opt.sel-ato{ border-color:#4ade80; background:rgba(22,163,74,0.25); color:#86efac; }
+
+/* 連番 */
+.seq-row{ display:flex; align-items:center; justify-content:space-between; }
+.seq-display{ font-size:38px; font-weight:700; color:var(–gold); letter-spacing:3px; }
+.seq-actions{ display:flex; gap:8px; }
+.seq-btn{
+width:42px; height:42px; border-radius:10px;
+border:1.5px solid var(–green-light); background:var(–green-dark);
+font-size:20px; cursor:pointer; color:var(–white);
+display:flex; align-items:center; justify-content:center;
+}
+.seq-hint{
+margin-top:10px; font-size:11px; color:rgba(255,255,255,0.4);
+background:var(–green-dark); border-radius:8px; padding:8px 10px;
+line-height:1.6; word-break:break-all; font-family:monospace;
+}
+.seq-hint strong{ color:var(–gold); }
+
+/* 撮影ボタン */
+.start-btn{
+position:fixed; bottom:0; left:0; right:0;
+background:var(–green-board);
+border-top:2px solid var(–green-light);
+border-left:none; border-right:none; border-bottom:none;
+color:var(–white);
+padding:18px 20px calc(env(safe-area-inset-bottom,0px) + 18px);
+font-size:17px; font-weight:700; font-family:inherit;
+cursor:pointer; -webkit-appearance:none;
+display:flex; align-items:center; justify-content:center; gap:8px;
+z-index:10;
+}
+.start-btn:active{ background:var(–green-light); }
+
+/* 履歴ボタン */
+.hist-fab{
+position:fixed;
+top: calc(env(safe-area-inset-top,44px) + 10px);
+right:14px;
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.2);
+border-radius:20px;
+color:var(–white); font-size:12px; font-family:inherit;
+padding:8px 14px; cursor:pointer; z-index:20;
 }
 
-.card {
-background: white; border-radius: var(–radius);
-padding: 16px; margin-bottom: 12px;
-box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+/* ===== CAMERA ===== */
+#cameraScreen{ background:#000; overflow:hidden; }
+#videoWrap{
+position:fixed; top:0;left:0;right:0;bottom:0;
+background:#000; z-index:1;
 }
-.card-title {
-font-size: 11px; font-weight: 700; color: var(–gray400);
-text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;
-}
-
-.field { margin-bottom: 12px; }
-.field:last-child { margin-bottom: 0; }
-.field label {
-display: flex; align-items: center; gap: 6px;
-font-size: 12px; font-weight: 700; color: var(–gray600); margin-bottom: 6px;
-}
-.req { color: #ef4444; font-size: 10px; }
-.opt { color: var(–gray400); font-size: 10px; }
-
-.field input {
-width: 100%;
-border: 1.5px solid var(–gray200); border-radius: 10px;
-padding: 12px 14px; font-size: 16px;
-font-family: inherit; color: var(–text);
-background: var(–gray50); outline: none;
--webkit-appearance: none; appearance: none;
-}
-.field input:focus { border-color: var(–blue); background: white; }
-.field input::placeholder { color: var(–gray400); }
-
-.status-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.status-opt {
-padding: 11px 4px; border-radius: 10px;
-border: 2px solid var(–gray200); background: white;
-font-size: 14px; font-weight: 700; font-family: inherit;
-color: var(–gray600); cursor: pointer; text-align: center;
-}
-.status-opt.sel-mae  { border-color: var(–blue);   background: var(–blue-light);   color: var(–blue); }
-.status-opt.sel-chu  { border-color: var(–orange);  background: var(–orange-light); color: var(–orange); }
-.status-opt.sel-ato  { border-color: var(–green);   background: var(–green-light);  color: var(–green); }
-
-.seq-row { display: flex; align-items: center; justify-content: space-between; }
-.seq-display { font-size: 38px; font-weight: 700; color: var(–navy2); letter-spacing: 2px; }
-.seq-actions { display: flex; gap: 8px; }
-.seq-btn {
-width: 42px; height: 42px; border-radius: 10px;
-border: 1.5px solid var(–gray200); background: white;
-font-size: 20px; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-}
-.seq-hint {
-margin-top: 10px; font-size: 12px; color: var(–gray400);
-background: var(–gray50); border-radius: 8px; padding: 8px 10px;
-line-height: 1.6; word-break: break-all; font-family: monospace;
+#videoEl{
+position:absolute; top:50%; left:50%;
+transform:translate(-50%,-50%);
+min-width:100%; min-height:100%;
+width:auto; height:auto;
+object-fit:cover;
 }
 
-.start-btn {
-width: 100%; background: var(–navy2); color: white;
-border: none; border-radius: var(–radius);
-padding: 18px; font-size: 17px; font-weight: 700; font-family: inherit;
-cursor: pointer; margin-bottom: 10px;
-box-shadow: 0 4px 16px rgba(26,58,92,0.4);
-display: flex; align-items: center; justify-content: center; gap: 8px;
--webkit-appearance: none;
+/* ===== 電子黒板（ドラッグ可能）===== */
+#blackboard{
+position:fixed;
+left:12px; bottom:160px;
+z-index:20;
+cursor:grab;
+touch-action:none;
+user-select:none;
 }
-.start-btn:active { opacity: 0.85; }
+#blackboard:active{ cursor:grabbing; }
 
-/* ======== CAMERA ======== */
-#cameraScreen {
-background: #000;
-overflow: hidden;
-}
-
-#videoWrap {
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-background: #000;
-z-index: 1;
+.bb-wrap{
+background: var(–green-board);
+border: 2px solid var(–board-line);
+border-radius:4px;
+width:230px;
+overflow:hidden;
+box-shadow: 2px 2px 12px rgba(0,0,0,0.6);
 }
 
-#videoEl {
-position: absolute;
-top: 50%; left: 50%;
-transform: translate(-50%, -50%);
-min-width: 100%; min-height: 100%;
-width: auto; height: auto;
-object-fit: cover;
--webkit-playsinline: true;
+/* 黒板の各行 */
+.bb-row{
+display:flex;
+border-bottom:1px solid var(–board-line);
+}
+.bb-row:last-child{ border-bottom:none; }
+
+.bb-key{
+background: var(–green-board);
+border-right:1px solid var(–board-line);
+padding:5px 6px;
+font-size:10px; font-weight:700; color:var(–white);
+min-width:58px; white-space:nowrap;
+display:flex; align-items:center;
+}
+.bb-val-cell{
+flex:1; padding:5px 7px;
+font-size:10px; color:var(–white); font-weight:500;
+word-break:break-all; line-height:1.4;
 }
 
-/* 電子黒板 */
-.blackboard {
-position: fixed;
-bottom: 160px; left: 10px;
-background: rgba(10, 30, 10, 0.88);
-border: 2px solid #8B6914;
-border-radius: 8px;
-padding: 10px 12px;
-min-width: 200px; max-width: 65vw;
-z-index: 10;
+/* 中段スペース（ステータス＋フリー）*/
+.bb-mid{
+border-bottom:1px solid var(–board-line);
+padding:6px 8px;
+min-height:52px;
+display:flex; flex-direction:column; gap:4px;
 }
-.bb-header {
-display: flex; justify-content: space-between; align-items: center;
-margin-bottom: 6px; padding-bottom: 5px;
-border-bottom: 1px solid rgba(139,105,20,0.5);
+.bb-status-badge{
+align-self:flex-start;
+font-size:10px; font-weight:700; color:var(–white);
+padding:2px 10px; border-radius:10px;
 }
-.bb-title { color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
-.bb-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; color: white; }
-.bb-row { display: flex; gap: 6px; margin-bottom: 4px; }
-.bb-row:last-child { margin-bottom: 0; }
-.bb-label { color: #7ec8e3; font-size: 10px; min-width: 50px; flex-shrink: 0; }
-.bb-val   { color: white; font-size: 10px; font-weight: 500; flex: 1; }
-.bb-time  { color: #FFD700; font-size: 10px; font-weight: 700; font-family: monospace; }
-
-/* カメラ上部バー */
-.cam-topbar {
-position: fixed; top: 0; left: 0; right: 0; z-index: 20;
-background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
-padding-top: env(safe-area-inset-top, 44px);
-padding-left: 16px; padding-right: 16px; padding-bottom: 16px;
-display: flex; justify-content: space-between; align-items: center;
-}
-.cam-close {
-width: 40px; height: 40px; border-radius: 20px;
-background: rgba(0,0,0,0.55); border: none; color: white;
-font-size: 18px; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-}
-.cam-seq { text-align: center; }
-.cam-seq-num { font-size: 28px; font-weight: 700; color: white; font-family: monospace; }
-.cam-seq-label { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 1px; }
-.cam-flash {
-width: 40px; height: 40px; border-radius: 20px;
-background: rgba(0,0,0,0.55); border: none; color: white;
-font-size: 18px; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
+.bb-free{
+font-size:10px; color:rgba(255,255,255,0.8);
+line-height:1.5; white-space:pre-wrap;
 }
 
-/* カメラ下部バー */
-.cam-bottombar {
-position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
-background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
-padding-top: 20px; padding-left: 16px; padding-right: 16px;
-display: flex; justify-content: space-around; align-items: center;
+/* 撮影日時行 — ラインなし */
+.bb-time-row{
+display:flex; align-items:center; justify-content:center;
+padding:4px 8px;
+font-size:10px; font-family:monospace; color:var(–gold);
+font-weight:700;
 }
-.cam-side-btn {
-display: flex; flex-direction: column; align-items: center; gap: 4px;
-background: none; border: none; color: white; cursor: pointer; min-width: 64px;
-}
-.cam-side-btn span:first-child { font-size: 28px; }
-.cam-side-label { font-size: 11px; opacity: 0.85; font-family: inherit; }
+/* 施工業者行（直前のbb-row）はborder-bottomなし */
+.bb-row.no-bottom{ border-bottom:none; }
 
-.shutter {
-width: 76px; height: 76px; border-radius: 50%;
-background: white; border: 4px solid rgba(255,255,255,0.5);
-display: flex; align-items: center; justify-content: center;
-cursor: pointer; -webkit-appearance: none;
+/* カメラUI */
+.cam-topbar{
+position:fixed; top:0;left:0;right:0; z-index:30;
+background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);
+padding-top:env(safe-area-inset-top,44px);
+padding-left:16px; padding-right:16px; padding-bottom:16px;
+display:flex; justify-content:space-between; align-items:center;
 }
-.shutter:active { transform: scale(0.93); }
-.shutter-inner {
-width: 62px; height: 62px; border-radius: 50%;
-background: white; border: 2px solid #ccc;
+.cam-close{
+width:40px; height:40px; border-radius:20px;
+background:rgba(0,0,0,0.55); border:none; color:white;
+font-size:18px; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
 }
-.shutter.saving { opacity: 0.5; }
+.cam-seq{ text-align:center; }
+.cam-seq-num{ font-size:28px; font-weight:700; color:white; font-family:monospace; }
+.cam-seq-label{ font-size:10px; color:rgba(255,255,255,0.6); margin-top:1px; }
+.cam-flash{
+width:40px; height:40px; border-radius:20px;
+background:rgba(0,0,0,0.55); border:none; color:white;
+font-size:18px; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+}
+.cam-bottombar{
+position:fixed; bottom:0;left:0;right:0; z-index:30;
+background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);
+padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px);
+padding-top:20px; padding-left:16px; padding-right:16px;
+display:flex; justify-content:space-around; align-items:center;
+}
+.cam-side-btn{
+display:flex; flex-direction:column; align-items:center; gap:4px;
+background:none; border:none; color:white; cursor:pointer; min-width:64px;
+}
+.cam-side-btn span:first-child{ font-size:28px; }
+.cam-side-label{ font-size:11px; opacity:.85; font-family:inherit; }
 
-/* ======== PREVIEW ======== */
-#previewScreen { background: #000; overflow: hidden; }
-.preview-img-wrap {
-flex: 1; display: flex; align-items: center; justify-content: center;
-background: #000; min-height: 0;
+.shutter{
+width:76px; height:76px; border-radius:50%;
+background:white; border:4px solid rgba(255,255,255,0.5);
+display:flex; align-items:center; justify-content:center;
+cursor:pointer; -webkit-appearance:none;
 }
-#previewImg { max-width: 100%; max-height: 100%; object-fit: contain; }
-.preview-footer {
-background: #111;
-padding: 14px 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
-flex-shrink: 0;
+.shutter:active{ transform:scale(0.93); }
+.shutter-inner{
+width:62px; height:62px; border-radius:50%;
+background:white; border:2px solid #ccc;
 }
-.preview-filename {
-background: #1a1a1a; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+.shutter.saving{ opacity:0.5; }
+
+/* ===== PREVIEW ===== */
+#previewScreen{ background:#000; overflow:hidden; }
+.preview-img-wrap{
+flex:1; display:flex; align-items:center; justify-content:center;
+background:#000; min-height:0;
 }
-.preview-filename-label { font-size: 10px; color: var(–gray400); margin-bottom: 4px; }
-.preview-filename-val  { font-family: monospace; font-size: 12px; color: #FFD700; word-break: break-all; }
-.save-hint { font-size: 11px; color: #4ade80; text-align: center; margin-bottom: 12px; }
-.preview-btns { display: flex; gap: 10px; }
-.preview-continue {
-flex: 1; background: var(–navy2); color: white; border: none;
-border-radius: 12px; padding: 15px; font-size: 15px; font-weight: 700;
-font-family: inherit; cursor: pointer; -webkit-appearance: none;
+#previewImg{ max-width:100%; max-height:100%; object-fit:contain; }
+.preview-footer{
+background: var(–green-dark);
+border-top:1px solid var(–green-light);
+padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 16px);
+flex-shrink:0;
 }
-.preview-home {
-background: #222; color: var(–gray400); border: none;
-border-radius: 12px; padding: 15px 16px; font-size: 13px;
-font-family: inherit; cursor: pointer; -webkit-appearance: none;
+.preview-filename{
+background:var(–green-mid); border:1px solid var(–green-light);
+border-radius:10px; padding:10px 14px; margin-bottom:14px;
+}
+.preview-filename-label{ font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:4px; }
+.preview-filename-val{ font-family:monospace; font-size:12px; color:var(–gold); word-break:break-all; }
+.save-hint{ font-size:11px; color:#4ade80; text-align:center; margin-bottom:12px; }
+.preview-btns{ display:flex; gap:10px; }
+.preview-continue{
+flex:1; background:var(–green-board); color:white; border:1px solid var(–green-light);
+border-radius:12px; padding:15px; font-size:15px; font-weight:700;
+font-family:inherit; cursor:pointer; -webkit-appearance:none;
+}
+.preview-home{
+background:var(–green-mid); color:rgba(255,255,255,0.6);
+border:1px solid var(–green-light);
+border-radius:12px; padding:15px 16px; font-size:13px;
+font-family:inherit; cursor:pointer; -webkit-appearance:none;
 }
 
-/* ======== HISTORY ======== */
-#historyScreen { background: var(–gray50); color: var(–text); }
-.hist-header {
-background: var(–navy2);
-padding: env(safe-area-inset-top, 44px) 16px 14px;
-display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+/* ===== HISTORY ===== */
+#historyScreen{ background:var(–green-dark); color:var(–white); }
+.hist-header{
+background:var(–green-mid);
+border-bottom:1px solid var(–green-light);
+padding:env(safe-area-inset-top,44px) 16px 14px;
+display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
 }
-.hist-header h2 { color: white; font-size: 17px; font-weight: 700; }
-.hist-back  { background: none; border: none; color: white; font-size: 14px; cursor: pointer; font-family: inherit; padding: 4px; }
-.hist-clear { background: none; border: none; color: #f87171; font-size: 13px; cursor: pointer; font-family: inherit; }
-.hist-list  { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.hist-item  { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: white; border-bottom: 1px solid var(–gray100); }
-.hist-dot   { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.hist-info  { flex: 1; min-width: 0; }
-.hist-fname { font-size: 12px; font-weight: 700; font-family: monospace; color: var(–text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hist-meta  { font-size: 11px; color: var(–gray400); margin-top: 2px; }
-.hist-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; color: white; flex-shrink: 0; }
-.hist-empty { display: flex; align-items: center; justify-content: center; flex: 1; color: var(–gray400); font-size: 15px; }
+.hist-header h2{ color:white; font-size:17px; font-weight:700; }
+.hist-back{ background:none; border:none; color:white; font-size:14px; cursor:pointer; font-family:inherit; padding:4px; }
+.hist-clear{ background:none; border:none; color:#f87171; font-size:13px; cursor:pointer; font-family:inherit; }
+.hist-list{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.hist-item{
+display:flex; align-items:center; gap:10px;
+padding:12px 16px;
+background:var(–green-mid);
+border-bottom:1px solid var(–green-dark);
+}
+.hist-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.hist-info{ flex:1; min-width:0; }
+.hist-fname{ font-size:12px; font-weight:700; font-family:monospace; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hist-meta{ font-size:11px; color:rgba(255,255,255,0.45); margin-top:2px; }
+.hist-badge{ font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; color:white; flex-shrink:0; }
+.hist-empty{ display:flex; align-items:center; justify-content:center; flex:1; color:rgba(255,255,255,0.3); font-size:15px; }
 
-/* ======== TOAST / FLASH ======== */
-.flash-overlay { position: fixed; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 999; transition: opacity 0.06s; }
-.flash-overlay.on { opacity: 1; }
-.toast {
-position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
-background: rgba(15,23,42,0.92); color: white; padding: 12px 20px;
-border-radius: 100px; font-size: 13px; z-index: 9999;
-opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none;
+/* ===== フリーワード編集モーダル ===== */
+.modal-overlay{
+position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100;
+display:none; align-items:flex-end; justify-content:center;
 }
-.toast.show { opacity: 1; }
+.modal-overlay.open{ display:flex; }
+.modal-box{
+background:var(–green-mid); border:1px solid var(–green-light);
+border-radius:16px 16px 0 0; padding:20px 20px calc(env(safe-area-inset-bottom,0px)+20px);
+width:100%; max-width:500px;
+}
+.modal-title{ font-size:14px; font-weight:700; color:white; margin-bottom:12px; }
+.modal-box textarea{
+width:100%; min-height:100px;
+background:var(–green-dark); border:1.5px solid var(–green-light);
+border-radius:10px; padding:12px; font-size:15px;
+font-family:inherit; color:white; outline:none; resize:none;
+-webkit-appearance:none;
+}
+.modal-box textarea:focus{ border-color:var(–gold); }
+.modal-box textarea::placeholder{ color:rgba(255,255,255,0.3); }
+.modal-btns{ display:flex; gap:8px; margin-top:12px; }
+.modal-ok{
+flex:1; background:var(–green-board); color:white; border:1px solid var(–green-light);
+border-radius:10px; padding:12px; font-size:14px; font-weight:700;
+font-family:inherit; cursor:pointer;
+}
+.modal-cancel{
+background:var(–green-dark); color:rgba(255,255,255,0.5);
+border:1px solid var(–green-light);
+border-radius:10px; padding:12px 18px; font-size:14px;
+font-family:inherit; cursor:pointer;
+}
+
+/* ===== MISC ===== */
+.flash-overlay{ position:fixed; inset:0; background:white; opacity:0; pointer-events:none; z-index:999; transition:opacity 0.06s; }
+.flash-overlay.on{ opacity:1; }
+.toast{
+position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
+background:rgba(10,30,10,0.95); border:1px solid var(–green-light);
+color:white; padding:12px 20px; border-radius:100px; font-size:13px;
+z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-events:none;
+}
+.toast.show{ opacity:1; }
 </style>
 
 </head>
@@ -311,44 +383,69 @@ opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none;
 <div class="flash-overlay" id="flashOverlay"></div>
 <div class="toast" id="toast"></div>
 
+<!-- フリーワード編集モーダル -->
+
+<div class="modal-overlay" id="freeModal">
+  <div class="modal-box">
+    <div class="modal-title">📝 中段フリーテキスト編集</div>
+    <textarea id="freeInput" placeholder="例：既存シーリング撤去&#10;プライマー塗布完了"></textarea>
+    <div class="modal-btns">
+      <button class="modal-ok" onclick="saveFree()">決定</button>
+      <button class="modal-cancel" onclick="closeFreeModal()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== HOME ===== -->
 
 <div class="screen active" id="homeScreen">
-  <div class="home-header">
-    <div>
-      <h1>📋 工事写真帳</h1>
-      <p>電子黒板カメラ</p>
-    </div>
-    <button class="history-btn-header" onclick="showHistory()">📂 履歴</button>
-  </div>
+  <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <div class="home-body">
-    <div class="card">
-      <div class="card-title">工事情報</div>
-      <div class="field">
-        <label>工事名 <span class="opt">任意</span></label>
-        <input type="text" id="projectName" placeholder="例：〇〇邸 外壁改修工事" autocomplete="off">
-      </div>
-      <div class="field">
-        <label>施工場所 <span class="req">＊必須</span></label>
-        <input type="text" id="location" placeholder="例：1階廊下 / 外壁南面" autocomplete="off">
-      </div>
-      <div class="field">
-        <label>工種 <span class="req">＊必須</span></label>
-        <input type="text" id="workType" placeholder="例：塗装工事 / 防水工事" autocomplete="off">
-      </div>
-      <div class="field">
-        <label>施工業者名 <span class="opt">任意</span></label>
-        <input type="text" id="contractor" placeholder="例：〇〇建設株式会社" autocomplete="off">
-      </div>
-    </div>
 
 ```
+<div class="card">
+  <div class="card-title">工事情報</div>
+  <div class="field">
+    <label>工事件名 <span class="opt">任意</span></label>
+    <input type="text" id="projectName" placeholder="例：〇〇邸 外壁改修工事" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>施工場所 <span class="req">＊必須</span></label>
+    <input type="text" id="location" placeholder="例：1階廊下 / 外壁南面" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>工種 <span class="req">＊必須</span></label>
+    <input type="text" id="workType" placeholder="例：塗装工事 / 防水工事" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>施工業者 <span class="opt">任意</span></label>
+    <input type="text" id="contractor" placeholder="例：〇〇建設株式会社" autocomplete="off">
+  </div>
+</div>
+
 <div class="card">
   <div class="card-title">作業ステータス</div>
   <div class="status-grid">
     <button class="status-opt sel-mae" data-val="作業前" onclick="selectStatus(this)">作業前</button>
     <button class="status-opt" data-val="作業中" onclick="selectStatus(this)">作業中</button>
     <button class="status-opt" data-val="作業後" onclick="selectStatus(this)">作業後</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">中段フリーテキスト（黒板の空欄部分）</div>
+  <div style="background:var(--green-dark);border:1px solid var(--green-light);border-radius:8px;padding:10px 12px;min-height:52px;font-size:13px;color:rgba(255,255,255,0.7);white-space:pre-wrap;word-break:break-all;line-height:1.6;" id="freePreview">（未入力）</div>
+  <button onclick="openFreeModal()" style="margin-top:10px;width:100%;background:var(--green-dark);border:1px solid var(--green-light);border-radius:8px;padding:10px;color:rgba(255,255,255,0.6);font-size:13px;font-family:inherit;cursor:pointer;">✏️ 編集する</button>
+</div>
+
+<div class="card">
+  <div class="card-title">撮影日時の表示</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:14px;color:rgba(255,255,255,0.8);">黒板に撮影日時を表示する</span>
+    <button id="timeToggleBtn" onclick="toggleShowTime()"
+      style="background:var(--green-board);border:1.5px solid var(--green-light);border-radius:20px;
+             color:white;font-size:13px;font-weight:700;font-family:inherit;
+             padding:8px 18px;cursor:pointer;min-width:72px;">ON</button>
   </div>
 </div>
 
@@ -364,11 +461,10 @@ opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none;
   </div>
   <div class="seq-hint" id="seqHint">施工場所_工種_作業前_001.jpg</div>
 </div>
-
-<button class="start-btn" onclick="startCamera()">📷 撮影を開始する</button>
 ```
 
   </div>
+  <button class="start-btn" onclick="startCamera()">📷 撮影を開始する</button>
 </div>
 
 <!-- ===== CAMERA ===== -->
@@ -378,30 +474,37 @@ opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none;
     <video id="videoEl" autoplay playsinline webkit-playsinline muted></video>
   </div>
 
-  <div class="blackboard" id="blackboard">
-    <div class="bb-header">
-      <span class="bb-title">📋 工事写真</span>
-      <span class="bb-badge" id="bbBadge">作業前</span>
-    </div>
-    <div id="bbProjectRow" class="bb-row" style="display:none">
-      <span class="bb-label">工事名</span>
-      <span class="bb-val" id="bbProject"></span>
-    </div>
-    <div class="bb-row">
-      <span class="bb-label">施工場所</span>
-      <span class="bb-val" id="bbLocation">—</span>
-    </div>
-    <div class="bb-row">
-      <span class="bb-label">工種</span>
-      <span class="bb-val" id="bbWorkType">—</span>
-    </div>
-    <div id="bbContractorRow" class="bb-row" style="display:none">
-      <span class="bb-label">施工業者</span>
-      <span class="bb-val" id="bbContractor"></span>
-    </div>
-    <div class="bb-row">
-      <span class="bb-label">撮影日時</span>
-      <span class="bb-time" id="bbTime">—</span>
+  <!-- 電子黒板（ドラッグ可能） -->
+
+  <div id="blackboard">
+    <div class="bb-wrap">
+      <!-- 工事件名 -->
+      <div class="bb-row">
+        <div class="bb-key">工事件名</div>
+        <div class="bb-val-cell" id="bbProject">—</div>
+      </div>
+      <!-- 施工場所 -->
+      <div class="bb-row">
+        <div class="bb-key">工事場所</div>
+        <div class="bb-val-cell" id="bbLocation">—</div>
+      </div>
+      <!-- 工種 -->
+      <div class="bb-row">
+        <div class="bb-key">工　　種</div>
+        <div class="bb-val-cell" id="bbWorkType">—</div>
+      </div>
+      <!-- 中段スペース（ステータス＋フリー） -->
+      <div class="bb-mid">
+        <div class="bb-status-badge" id="bbBadge">作業前</div>
+        <div class="bb-free" id="bbFree"></div>
+      </div>
+      <!-- 施工業者 -->
+      <div class="bb-row no-bottom">
+        <div class="bb-key">施 工 者</div>
+        <div class="bb-val-cell" id="bbContractor">—</div>
+      </div>
+      <!-- 撮影日時（オフ時は非表示） -->
+      <div class="bb-time-row" id="bbTime">2026/03/10 00:00:00</div>
     </div>
   </div>
 
@@ -427,6 +530,13 @@ opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none;
       <span class="cam-side-label">反転</span>
     </button>
   </div>
+  <!-- 撮影日時トグル（カメラ画面内） -->
+  <button id="camTimeToggle" onclick="toggleShowTime()"
+    style="position:fixed;top:calc(env(safe-area-inset-top,44px) + 56px);right:10px;z-index:31;
+           background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.3);border-radius:14px;
+           color:white;font-size:11px;font-weight:700;font-family:inherit;padding:5px 10px;cursor:pointer;">
+    🕐 日時ON
+  </button>
 </div>
 
 <!-- ===== PREVIEW ===== -->
@@ -436,7 +546,7 @@ opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none;
     <img id="previewImg" src="" alt="">
   </div>
   <div class="preview-footer">
-    <div class="save-hint">✅ 写真を長押し → 「写真を保存」でカメラロールに保存できます</div>
+    <div class="save-hint">✅ 写真を長押し → 「写真を保存」でカメラロールに保存</div>
     <div class="preview-filename">
       <div class="preview-filename-label">📁 ファイル名</div>
       <div class="preview-filename-val" id="previewFname">—</div>
@@ -460,27 +570,29 @@ opacity: 0; transition: opacity 0.3s; white-space: nowrap; pointer-events: none;
 </div>
 
 <script>
-// ======== STATE ========
+// ===== STATE =====
 const S = {
-  projectName: '', location: '', workType: '', contractor: '',
-  status: '作業前', seq: 1,
+  projectName:'', location:'', workType:'', contractor:'',
+  freeText:'', status:'作業前', seq:1,
+  showTime: true,
+  bbX:12, bbY:-1,
 };
-const STATUS_COLORS = { '作業前':'#2563eb', '作業中':'#ea580c', '作業後':'#16a34a' };
-const STATUS_SEL    = { '作業前':'sel-mae', '作業中':'sel-chu', '作業後':'sel-ato' };
+const SC = { '作業前':'#2563eb', '作業中':'#ea580c', '作業後':'#16a34a' };
+const SS = { '作業前':'sel-mae', '作業中':'sel-chu', '作業後':'sel-ato' };
 
-let stream = null, facing = 'environment', flashOn = false, clockTimer = null;
+let stream=null, facing='environment', flashOn=false, clockTimer=null;
 
-// ======== PERSIST ========
-function save() { try { localStorage.setItem('kjs2', JSON.stringify(S)); } catch(e){} }
-function load() { try { Object.assign(S, JSON.parse(localStorage.getItem('kjs2')||'{}')); } catch(e){} }
-function getHist() { try { return JSON.parse(localStorage.getItem('kjs_h')||'[]'); } catch(e){ return []; } }
-function addHist(i) {
-  const h = getHist(); h.unshift(i);
-  if (h.length>300) h.pop();
-  try { localStorage.setItem('kjs_h', JSON.stringify(h)); } catch(e){}
+// ===== PERSIST =====
+function save(){ try{ localStorage.setItem('kjs3',JSON.stringify(S)); }catch(e){} }
+function load(){ try{ Object.assign(S,JSON.parse(localStorage.getItem('kjs3')||'{}')); }catch(e){} }
+function getHist(){ try{ return JSON.parse(localStorage.getItem('kjs_h')||'[]'); }catch(e){ return []; } }
+function addHist(i){
+  const h=getHist(); h.unshift(i);
+  if(h.length>300) h.pop();
+  try{ localStorage.setItem('kjs_h',JSON.stringify(h)); }catch(e){}
 }
 
-// ======== UTILS ========
+// ===== UTILS =====
 function pad(n,d=3){ return String(n).padStart(d,'0'); }
 function clean(s){ return (s||'').trim().replace(/[\\/:*?"<>|\s]/g,'').slice(0,30); }
 function buildFname(){
@@ -499,45 +611,76 @@ function toast(msg){
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
 }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-// ======== HOME UI ========
+// ===== HOME UI =====
 function refreshHome(){
   document.getElementById('projectName').value = S.projectName||'';
   document.getElementById('location').value    = S.location||'';
   document.getElementById('workType').value    = S.workType||'';
   document.getElementById('contractor').value  = S.contractor||'';
   document.getElementById('seqDisplay').textContent = pad(S.seq);
-  refreshHint();
-  refreshStatusBtns();
+  document.getElementById('freePreview').textContent = S.freeText||'（未入力）';
+  refreshHint(); refreshStatusBtns(); refreshTimeToggle();
 }
-function refreshHint(){ document.getElementById('seqHint').textContent = buildFname(); }
+function toggleShowTime(){
+  S.showTime = !S.showTime;
+  refreshTimeToggle(); save();
+}
+function refreshTimeToggle(){
+  const on = S.showTime;
+  // ホームボタン
+  const hb = document.getElementById('timeToggleBtn');
+  if(hb){
+    hb.textContent = on ? 'ON' : 'OFF';
+    hb.style.background = on ? 'var(--green-board)' : 'rgba(255,255,255,0.1)';
+    hb.style.color = on ? 'white' : 'rgba(255,255,255,0.4)';
+  }
+  // カメラ内ボタン
+  const cb = document.getElementById('camTimeToggle');
+  if(cb){
+    cb.textContent = on ? '🕐 日時ON' : '🕐 日時OFF';
+    cb.style.borderColor = on ? 'rgba(255,220,80,0.6)' : 'rgba(255,255,255,0.3)';
+    cb.style.color = on ? '#FFD700' : 'rgba(255,255,255,0.5)';
+  }
+  // 黒板の日時行
+  const bbTime = document.getElementById('bbTime');
+  if(bbTime) bbTime.style.display = on ? 'flex' : 'none';
+}
+function refreshHint(){ document.getElementById('seqHint').textContent=buildFname(); }
 function refreshStatusBtns(){
   document.querySelectorAll('.status-opt').forEach(b=>{
     b.className='status-opt';
-    if(b.dataset.val===S.status) b.classList.add(STATUS_SEL[S.status]);
+    if(b.dataset.val===S.status) b.classList.add(SS[S.status]);
   });
 }
-function selectStatus(el){
-  S.status=el.dataset.val; refreshStatusBtns(); refreshHint(); save();
-}
-function changeSeq(d){
-  S.seq=Math.max(1,S.seq+d);
-  document.getElementById('seqDisplay').textContent=pad(S.seq);
-  refreshHint(); save();
-}
+function selectStatus(el){ S.status=el.dataset.val; refreshStatusBtns(); refreshHint(); save(); }
+function changeSeq(d){ S.seq=Math.max(1,S.seq+d); document.getElementById('seqDisplay').textContent=pad(S.seq); refreshHint(); save(); }
 function resetSeq(){
   if(!confirm('連番を1にリセットしますか？')) return;
-  S.seq=1;
-  document.getElementById('seqDisplay').textContent='001';
-  refreshHint(); save();
+  S.seq=1; document.getElementById('seqDisplay').textContent='001'; refreshHint(); save();
 }
 ['projectName','location','workType','contractor'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', e=>{
-    S[id]=e.target.value; refreshHint(); save();
-  });
+  document.getElementById(id).addEventListener('input',e=>{ S[id]=e.target.value; refreshHint(); save(); });
 });
 
-// ======== CAMERA ========
+// ===== フリーテキストモーダル =====
+function openFreeModal(){
+  document.getElementById('freeInput').value=S.freeText||'';
+  document.getElementById('freeModal').classList.add('open');
+  setTimeout(()=>document.getElementById('freeInput').focus(),100);
+}
+function closeFreeModal(){ document.getElementById('freeModal').classList.remove('open'); }
+function saveFree(){
+  S.freeText=document.getElementById('freeInput').value;
+  document.getElementById('freePreview').textContent=S.freeText||'（未入力）';
+  save(); closeFreeModal();
+}
+
+// ===== CAMERA =====
 async function startCamera(){
   S.location    = document.getElementById('location').value.trim();
   S.workType    = document.getElementById('workType').value.trim();
@@ -545,67 +688,45 @@ async function startCamera(){
   S.contractor  = document.getElementById('contractor').value.trim();
   if(!S.location||!S.workType){ toast('⚠ 施工場所と工種を入力してください'); return; }
   save();
-
   showScreen('cameraScreen');
-
-  try {
-    const constraints = {
-      video: {
-        facingMode: { ideal: facing },
-        width:  { ideal: 1920 },
-        height: { ideal: 1080 },
-      },
-      audio: false
-    };
-    stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-    const vid = document.getElementById('videoEl');
-    vid.srcObject = stream;
-
-    // iOS Safari requires explicit play() call
-    vid.onloadedmetadata = () => {
-      vid.play().catch(e => console.warn('play error:', e));
-    };
-
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ideal:facing}, width:{ideal:1920}, height:{ideal:1080} }, audio:false
+    });
+    const vid=document.getElementById('videoEl');
+    vid.srcObject=stream;
+    vid.onloadedmetadata=()=>vid.play().catch(()=>{});
+    initBBPosition();
     refreshBlackboard();
     startClock();
-  } catch(e) {
-    console.error('Camera error:', e);
+  }catch(e){
+    console.error(e);
     showScreen('homeScreen');
-    if(e.name==='NotAllowedError'){
-      toast('⚠ カメラの許可が必要です。設定→Safari→カメラを確認してください');
-    } else {
-      toast('⚠ カメラを起動できませんでした: '+e.message);
-    }
+    if(e.name==='NotAllowedError') toast('⚠ カメラ許可が必要です。設定→Safari→カメラを確認');
+    else toast('⚠ カメラ起動失敗: '+e.message);
   }
 }
-
-function stopCamera(){
-  stopStream(); stopClock();
-  showScreen('homeScreen');
-}
+function stopCamera(){ stopStream(); stopClock(); showScreen('homeScreen'); }
 function stopStream(){
   if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
-  document.getElementById('videoEl').srcObject = null;
+  document.getElementById('videoEl').srcObject=null;
 }
-
 function startClock(){ stopClock(); clockTimer=setInterval(tickClock,1000); tickClock(); }
 function stopClock(){ if(clockTimer){ clearInterval(clockTimer); clockTimer=null; } }
 function tickClock(){ document.getElementById('bbTime').textContent=nowStr(); }
 
 function refreshBlackboard(){
-  const c=STATUS_COLORS[S.status]||'#666';
+  const c=SC[S.status]||'#666';
   const badge=document.getElementById('bbBadge');
   badge.textContent=S.status; badge.style.background=c;
-
-  document.getElementById('bbProject').textContent   = S.projectName||'';
+  document.getElementById('bbProject').textContent   = S.projectName||'—';
   document.getElementById('bbLocation').textContent  = S.location||'—';
   document.getElementById('bbWorkType').textContent  = S.workType||'—';
-  document.getElementById('bbContractor').textContent= S.contractor||'';
-  document.getElementById('bbProjectRow').style.display    = S.projectName ? 'flex':'none';
-  document.getElementById('bbContractorRow').style.display = S.contractor  ? 'flex':'none';
+  document.getElementById('bbContractor').textContent= S.contractor||'—';
+  document.getElementById('bbFree').textContent      = S.freeText||'';
   document.getElementById('statusLabel').textContent = S.status;
   document.getElementById('camSeqNum').textContent   = pad(S.seq);
+  refreshTimeToggle();
 }
 
 function cycleStatus(){
@@ -613,123 +734,210 @@ function cycleStatus(){
   S.status=opts[(opts.indexOf(S.status)+1)%3];
   refreshBlackboard(); save();
 }
-
 function toggleFlash(){
   flashOn=!flashOn;
   document.getElementById('flashBtn').textContent=flashOn?'💡':'⚡';
   if(stream){
     const t=stream.getVideoTracks()[0];
-    if(t?.getCapabilities?.()?.torch){
-      t.applyConstraints({advanced:[{torch:flashOn}]}).catch(()=>{});
-    }
+    if(t?.getCapabilities?.()?.torch) t.applyConstraints({advanced:[{torch:flashOn}]}).catch(()=>{});
   }
 }
-
 async function flipCamera(){
-  facing = facing==='environment'?'user':'environment';
+  facing=facing==='environment'?'user':'environment';
   stopStream();
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: facing } }, audio: false
-    });
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({ video:{facingMode:{ideal:facing}}, audio:false });
     const vid=document.getElementById('videoEl');
-    vid.srcObject=stream;
-    vid.onloadedmetadata=()=>vid.play().catch(()=>{});
-  } catch(e){ toast('カメラ切替に失敗しました'); }
+    vid.srcObject=stream; vid.onloadedmetadata=()=>vid.play().catch(()=>{});
+  }catch(e){ toast('カメラ切替失敗'); }
 }
 
-// ======== CAPTURE ========
+// ===== 黒板ドラッグ =====
+function initBBPosition(){
+  const bb=document.getElementById('blackboard');
+  // 初期位置: 左下
+  bb.style.left='12px';
+  bb.style.bottom='160px';
+  bb.style.top='';
+}
+
+(function setupDrag(){
+  const bb=document.getElementById('blackboard');
+  let dragging=false, startX=0, startY=0, origLeft=0, origTop=0;
+
+  function getPos(){
+    const r=bb.getBoundingClientRect();
+    return { left:r.left, top:r.top };
+  }
+
+  // タッチ
+  bb.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1) return;
+    dragging=true;
+    const pos=getPos();
+    origLeft=pos.left; origTop=pos.top;
+    startX=e.touches[0].clientX; startY=e.touches[0].clientY;
+    bb.style.left=origLeft+'px'; bb.style.top=origTop+'px'; bb.style.bottom='auto';
+    e.preventDefault();
+  },{passive:false});
+
+  bb.addEventListener('touchmove',e=>{
+    if(!dragging||e.touches.length!==1) return;
+    const dx=e.touches[0].clientX-startX, dy=e.touches[0].clientY-startY;
+    const nLeft=Math.max(0,Math.min(window.innerWidth-bb.offsetWidth, origLeft+dx));
+    const nTop =Math.max(0,Math.min(window.innerHeight-bb.offsetHeight, origTop+dy));
+    bb.style.left=nLeft+'px'; bb.style.top=nTop+'px';
+    e.preventDefault();
+  },{passive:false});
+
+  bb.addEventListener('touchend',()=>{ dragging=false; });
+
+  // マウス（PC確認用）
+  bb.addEventListener('mousedown',e=>{
+    dragging=true;
+    const pos=getPos();
+    origLeft=pos.left; origTop=pos.top;
+    startX=e.clientX; startY=e.clientY;
+    bb.style.left=origLeft+'px'; bb.style.top=origTop+'px'; bb.style.bottom='auto';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!dragging) return;
+    const dx=e.clientX-startX, dy=e.clientY-startY;
+    const nLeft=Math.max(0,Math.min(window.innerWidth-bb.offsetWidth, origLeft+dx));
+    const nTop =Math.max(0,Math.min(window.innerHeight-bb.offsetHeight, origTop+dy));
+    bb.style.left=nLeft+'px'; bb.style.top=nTop+'px';
+  });
+  document.addEventListener('mouseup',()=>{ dragging=false; });
+})();
+
+// ===== CAPTURE =====
 async function capture(){
   const btn=document.getElementById('shutterBtn');
   if(btn.classList.contains('saving')) return;
   btn.classList.add('saving');
-
   const fl=document.getElementById('flashOverlay');
-  fl.classList.add('on');
-  setTimeout(()=>fl.classList.remove('on'),120);
+  fl.classList.add('on'); setTimeout(()=>fl.classList.remove('on'),120);
 
-  try {
+  try{
     const vid=document.getElementById('videoEl');
     const w=vid.videoWidth||1280, h=vid.videoHeight||720;
     const canvas=document.createElement('canvas');
     canvas.width=w; canvas.height=h;
     const ctx=canvas.getContext('2d');
-
-    // ビデオフレーム描画
     ctx.drawImage(vid,0,0,w,h);
-
-    // 黒板を重ね描き
-    drawBB(ctx,w,h);
+    drawBBOnCanvas(ctx,w,h);
 
     const dataUrl=canvas.toDataURL('image/jpeg',0.92);
     const fname=buildFname();
 
     addHist({ fileName:fname, location:S.location, workType:S.workType, status:S.status, seq:S.seq, capturedAt:new Date().toISOString() });
-
-    S.seq++; save();
-    refreshBlackboard();
+    S.seq++; save(); refreshBlackboard();
 
     document.getElementById('previewImg').src=dataUrl;
     document.getElementById('previewFname').textContent=fname;
     stopClock();
     showScreen('previewScreen');
-  } catch(e){
-    console.error(e);
-    toast('撮影に失敗しました');
-  } finally {
+  }catch(e){
+    console.error(e); toast('撮影に失敗しました');
+  }finally{
     btn.classList.remove('saving');
   }
 }
 
-function drawBB(ctx,cw,ch){
+function drawBBOnCanvas(ctx,cw,ch){
   const bb=document.getElementById('blackboard');
   const bbR=bb.getBoundingClientRect();
-  const vidR=document.getElementById('videoWrap').getBoundingClientRect();
-
-  const sx=cw/vidR.width, sy=ch/vidR.height;
-  const bx=(bbR.left-vidR.left)*sx, by=(bbR.top-vidR.top)*sy;
+  const vR=document.getElementById('videoWrap').getBoundingClientRect();
+  const sx=cw/vR.width, sy=ch/vR.height;
+  const bx=(bbR.left-vR.left)*sx, by=(bbR.top-vR.top)*sy;
   const bw=bbR.width*sx, bh=bbR.height*sy;
-  const pad=10*sx, fs=11*sx, lh=18*sy;
 
   ctx.save();
-  ctx.fillStyle='rgba(10,30,10,0.88)';
-  rrect(ctx,bx,by,bw,bh,8*sx); ctx.fill();
-  ctx.strokeStyle='#8B6914'; ctx.lineWidth=2*sx;
-  rrect(ctx,bx,by,bw,bh,8*sx); ctx.stroke();
 
-  ctx.font=`700 ${fs}px -apple-system,sans-serif`;
-  ctx.textBaseline='top';
-  let y=by+pad;
+  // 外枠
+  ctx.fillStyle='#2d6e2d';
+  rrect(ctx,bx,by,bw,bh,4*sx); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=2*sx;
+  rrect(ctx,bx,by,bw,bh,4*sx); ctx.stroke();
 
-  // タイトル
-  ctx.fillStyle='white'; ctx.fillText('📋 工事写真',bx+pad,y);
-  // バッジ
-  const bc=STATUS_COLORS[S.status]||'#666';
-  const bt=S.status, bm=ctx.measureText(bt);
-  const bw2=bm.width+14*sx, bh2=16*sy, bx2=bx+bw-pad-bw2;
-  ctx.fillStyle=bc; rrect(ctx,bx2,y,bw2,bh2,8*sx); ctx.fill();
-  ctx.font=`700 ${fs*0.9}px -apple-system,sans-serif`;
-  ctx.fillStyle='white'; ctx.fillText(bt,bx2+7*sx,y+2*sy);
+  const fs=11*sx, lh=22*sy, kw=58*sx, p=7*sx;
 
-  y+=lh+4*sy;
-  ctx.strokeStyle='rgba(139,105,20,0.5)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(bx+pad,y); ctx.lineTo(bx+bw-pad,y); ctx.stroke();
-  y+=6*sy;
+  const rows=[
+    ['工事件名', S.projectName||'—'],
+    ['工事場所', S.location||'—'],
+    ['工　　種', S.workType||'—'],
+  ];
 
-  ctx.font=`500 ${fs}px -apple-system,sans-serif`;
-  const rows=[];
-  if(S.projectName) rows.push(['工事名',S.projectName]);
-  rows.push(['施工場所',S.location||'—']);
-  rows.push(['工種',S.workType||'—']);
-  if(S.contractor) rows.push(['施工業者',S.contractor]);
-  rows.push(['撮影日時',nowStr()]);
+  let y=by;
 
-  rows.forEach(([l,v],i)=>{
-    ctx.fillStyle='#7ec8e3'; ctx.fillText(l,bx+pad,y);
-    ctx.fillStyle=(i===rows.length-1)?'#FFD700':'white';
-    ctx.fillText(v,bx+pad+56*sx,y);
+  // 上部3行
+  rows.forEach(([k,v])=>{
+    // キー背景
+    ctx.fillStyle='rgba(0,0,0,0.15)';
+    ctx.fillRect(bx,y,kw,lh);
+    // 区切り線
+    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(bx,y+lh); ctx.lineTo(bx+bw,y+lh); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx+kw,y); ctx.lineTo(bx+kw,y+lh); ctx.stroke();
+
+    ctx.font=`700 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle='white'; ctx.textBaseline='middle';
+    ctx.fillText(k,bx+4*sx,y+lh/2);
+    ctx.font=`500 ${fs}px -apple-system,sans-serif`;
+    ctx.fillText(v,bx+kw+p,y+lh/2);
     y+=lh;
   });
+
+  // 中段スペース（ステータス＋フリー）
+  const midH=52*sy;
+  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(bx,y+midH); ctx.lineTo(bx+bw,y+midH); ctx.stroke();
+
+  // ステータスバッジ
+  const bc=SC[S.status]||'#666';
+  const bt=S.status;
+  ctx.font=`700 ${fs*0.9}px -apple-system,sans-serif`;
+  const bm=ctx.measureText(bt);
+  const badgeW=bm.width+14*sx, badgeH=16*sy;
+  ctx.fillStyle=bc;
+  rrect(ctx,bx+p,y+5*sy,badgeW,badgeH,8*sx); ctx.fill();
+  ctx.fillStyle='white'; ctx.textBaseline='middle';
+  ctx.fillText(bt,bx+p+7*sx,y+5*sy+badgeH/2);
+
+  // フリーテキスト
+  if(S.freeText){
+    ctx.font=`500 ${fs*0.95}px -apple-system,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    const lines=S.freeText.split('\n').slice(0,2);
+    lines.forEach((l,i)=>{
+      ctx.fillText(l,bx+p,y+24*sy+(i*13*sy));
+    });
+  }
+  y+=midH;
+
+  // 施工業者行
+  ctx.fillStyle='rgba(0,0,0,0.15)';
+  ctx.fillRect(bx,y,kw,lh);
+  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(bx,y+lh); ctx.lineTo(bx+bw,y+lh); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bx+kw,y); ctx.lineTo(bx+kw,y+lh); ctx.stroke();
+  ctx.font=`700 ${fs}px -apple-system,sans-serif`;
+  ctx.fillStyle='white'; ctx.textBaseline='middle';
+  ctx.fillText('施 工 者',bx+4*sx,y+lh/2);
+  ctx.font=`500 ${fs}px -apple-system,sans-serif`;
+  ctx.fillText(S.contractor||'—',bx+kw+p,y+lh/2);
+  y+=lh;
+
+  // 日時行（オフ時はスキップ）
+  if(S.showTime){
+    ctx.font=`700 ${fs*0.95}px monospace`;
+    ctx.fillStyle='#d4a843'; ctx.textBaseline='middle';
+    ctx.textAlign='center';
+    ctx.fillText(nowStr(),bx+bw/2,y+10*sy);
+    ctx.textAlign='left';
+  }
+
   ctx.restore();
 }
 
@@ -742,17 +950,18 @@ function rrect(ctx,x,y,w,h,r){
   ctx.closePath();
 }
 
-// ======== PREVIEW ========
+// ===== PREVIEW =====
 function continueCapture(){
   showScreen('cameraScreen');
-  const vid=document.getElementById('videoEl');
-  if(stream){ vid.srcObject=stream; vid.play().catch(()=>{}); }
-  else { startCamera(); return; }
+  if(stream){
+    const vid=document.getElementById('videoEl');
+    vid.srcObject=stream; vid.play().catch(()=>{});
+  } else { startCamera(); return; }
   refreshBlackboard(); startClock();
 }
 function goHome(){ stopStream(); stopClock(); showScreen('homeScreen'); refreshHome(); }
 
-// ======== HISTORY ========
+// ===== HISTORY =====
 function showHistory(){
   const h=getHist();
   const list=document.getElementById('histList');
@@ -760,7 +969,7 @@ function showHistory(){
     list.innerHTML='<div class="hist-empty">📷 まだ撮影履歴がありません</div>';
   } else {
     list.innerHTML=h.map(item=>{
-      const c=STATUS_COLORS[item.status]||'#999';
+      const c=SC[item.status]||'#666';
       const dt=new Date(item.capturedAt).toLocaleString('ja-JP');
       return `<div class="hist-item">
         <div class="hist-dot" style="background:${c}"></div>
@@ -779,13 +988,7 @@ function clearHistory(){
   localStorage.removeItem('kjs_h'); showHistory();
 }
 
-// ======== NAV ========
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-// ======== INIT ========
+// ===== INIT =====
 load(); refreshHome();
 </script>
 
