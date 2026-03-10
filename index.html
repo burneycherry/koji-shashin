@@ -53,13 +53,13 @@ padding-bottom: calc(env(safe-area-inset-bottom,0px) + 80px);
 
 /* カード */
 .card{
-background: var(–green-mid);
-border: 1px solid var(–green-light);
+background: #1e5c1e;
+border: 1.5px solid #4aaa4a;
 border-radius: var(–radius);
 padding:16px; margin-bottom:12px;
 }
 .card-title{
-font-size:11px; font-weight:700; color:rgba(255,255,255,0.5);
+font-size:11px; font-weight:800; color:rgba(255,255,255,0.65);
 text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;
 }
 
@@ -68,77 +68,81 @@ text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;
 .field:last-child{ margin-bottom:0; }
 .field label{
 display:flex; align-items:center; gap:6px;
-font-size:12px; font-weight:700; color:rgba(255,255,255,0.7); margin-bottom:6px;
+font-size:13px; font-weight:800; color:#ffffff; margin-bottom:6px;
 }
-.req{ color:#f87171; font-size:10px; }
-.opt{ color:rgba(255,255,255,0.35); font-size:10px; }
+.req{ color:#ff8080; font-size:11px; font-weight:700; }
+.opt{ color:rgba(255,255,255,0.45); font-size:11px; }
 .field input{
 width:100%;
-background: var(–green-dark);
-border: 1.5px solid var(–green-light);
+background: #0f2a0f;
+border: 2px solid #4aaa4a;
 border-radius:10px;
 padding:12px 14px; font-size:16px;
-font-family:inherit; color:var(–white);
+font-family:inherit; color:#ffffff;
 outline:none; -webkit-appearance:none; appearance:none;
 }
-.field input:focus{ border-color: var(–gold); }
-.field input::placeholder{ color:rgba(255,255,255,0.3); }
+.field input:focus{ border-color: #FFD700; background:#1a3a1a; }
+.field input::placeholder{ color:rgba(255,255,255,0.35); }
 
 /* ステータス */
-.status-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.status-grid4{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; }
 .status-opt{
-padding:11px 4px; border-radius:10px;
-border:2px solid rgba(255,255,255,0.2);
-background: var(–green-dark);
-font-size:13px; font-weight:700; font-family:inherit;
-color:rgba(255,255,255,0.5); cursor:pointer; text-align:center;
+padding:12px 4px; border-radius:10px;
+border:2px solid rgba(255,255,255,0.25);
+background: #0f2a0f;
+font-size:14px; font-weight:800; font-family:inherit;
+color:rgba(255,255,255,0.55); cursor:pointer; text-align:center;
 }
-.status-opt.sel-mae{ border-color:#60a5fa; background:rgba(37,99,235,0.25); color:#93c5fd; }
-.status-opt.sel-chu{ border-color:#fb923c; background:rgba(234,88,12,0.25); color:#fdba74; }
-.status-opt.sel-ato{ border-color:#4ade80; background:rgba(22,163,74,0.25); color:#86efac; }
+.status-opt.sel-mae{ border-color:#60a5fa; background:rgba(37,99,235,0.4); color:#ffffff; }
+.status-opt.sel-chu{ border-color:#fb923c; background:rgba(234,88,12,0.4); color:#ffffff; }
+.status-opt.sel-ato{ border-color:#4ade80; background:rgba(22,163,74,0.4); color:#ffffff; }
+.status-opt.sel-free{ border-color:#FFD700; background:rgba(217,168,67,0.3); color:#FFD700; }
 
 /* 連番 */
 .seq-row{ display:flex; align-items:center; justify-content:space-between; }
-.seq-display{ font-size:38px; font-weight:700; color:var(–gold); letter-spacing:3px; }
+.seq-display{ font-size:42px; font-weight:800; color:#FFD700; letter-spacing:3px; }
 .seq-actions{ display:flex; gap:8px; }
 .seq-btn{
-width:42px; height:42px; border-radius:10px;
-border:1.5px solid var(–green-light); background:var(–green-dark);
-font-size:20px; cursor:pointer; color:var(–white);
+width:46px; height:46px; border-radius:10px;
+border:2px solid #4aaa4a; background:#0f2a0f;
+font-size:22px; cursor:pointer; color:#ffffff;
 display:flex; align-items:center; justify-content:center;
 }
 .seq-hint{
-margin-top:10px; font-size:11px; color:rgba(255,255,255,0.4);
-background:var(–green-dark); border-radius:8px; padding:8px 10px;
+margin-top:10px; font-size:12px; color:rgba(255,255,255,0.55);
+background:#0f2a0f; border-radius:8px; padding:8px 10px;
 line-height:1.6; word-break:break-all; font-family:monospace;
+border:1px solid #4aaa4a;
 }
-.seq-hint strong{ color:var(–gold); }
 
 /* 撮影ボタン */
 .start-btn{
 position:fixed; bottom:0; left:0; right:0;
-background:var(–green-board);
-border-top:2px solid var(–green-light);
+background:#2d6e2d;
+border-top:2px solid #4aaa4a;
 border-left:none; border-right:none; border-bottom:none;
-color:var(–white);
-padding:18px 20px calc(env(safe-area-inset-bottom,0px) + 18px);
-font-size:17px; font-weight:700; font-family:inherit;
+color:#ffffff;
+padding:20px 20px calc(env(safe-area-inset-bottom,0px) + 20px);
+font-size:18px; font-weight:800; font-family:inherit;
 cursor:pointer; -webkit-appearance:none;
 display:flex; align-items:center; justify-content:center; gap:8px;
 z-index:10;
+text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+letter-spacing:0.5px;
 }
-.start-btn:active{ background:var(–green-light); }
+.start-btn:active{ background:#3a8a3a; }
 
 /* 履歴ボタン */
 .hist-fab{
 position:fixed;
 top: calc(env(safe-area-inset-top,44px) + 10px);
 right:14px;
-background:rgba(255,255,255,0.1);
-border:1px solid rgba(255,255,255,0.2);
+background:#2d6e2d;
+border:2px solid #4aaa4a;
 border-radius:20px;
-color:var(–white); font-size:12px; font-family:inherit;
-padding:8px 14px; cursor:pointer; z-index:20;
+color:#ffffff; font-size:13px; font-weight:700; font-family:inherit;
+padding:9px 16px; cursor:pointer; z-index:20;
+text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
 /* ===== CAMERA ===== */
@@ -167,61 +171,67 @@ user-select:none;
 #blackboard:active{ cursor:grabbing; }
 
 .bb-wrap{
-background: var(–green-board);
-border: 2px solid var(–board-line);
+background: #2d6e2d;  /* 透明度なし・確実な緑 */
+border: 2px solid rgba(255,255,255,0.85);
 border-radius:4px;
-width:230px;
+width: 270px;         /* 幅を広げる */
 overflow:hidden;
-box-shadow: 2px 2px 12px rgba(0,0,0,0.6);
+box-shadow: 3px 3px 16px rgba(0,0,0,0.75);
 }
 
 /* 黒板の各行 */
 .bb-row{
 display:flex;
-border-bottom:1px solid var(–board-line);
+border-bottom:1px solid rgba(255,255,255,0.6);
+min-height:26px;
 }
-.bb-row:last-child{ border-bottom:none; }
+.bb-row.no-bottom{ border-bottom:none; }
 
 .bb-key{
-background: var(–green-board);
-border-right:1px solid var(–board-line);
+background: rgba(0,0,0,0.2);
+border-right:1px solid rgba(255,255,255,0.6);
 padding:5px 6px;
-font-size:10px; font-weight:700; color:var(–white);
-min-width:58px; white-space:nowrap;
+font-size:11px; font-weight:800; color:#ffffff;
+min-width:62px; max-width:62px; white-space:nowrap;
 display:flex; align-items:center;
+text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 .bb-val-cell{
-flex:1; padding:5px 7px;
-font-size:10px; color:var(–white); font-weight:500;
-word-break:break-all; line-height:1.4;
+flex:1; padding:5px 8px;
+font-size:11px; color:#ffffff; font-weight:600;
+word-break:break-all; line-height:1.5;
+text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* 中段スペース（ステータス＋フリー）*/
 .bb-mid{
-border-bottom:1px solid var(–board-line);
-padding:6px 8px;
-min-height:52px;
-display:flex; flex-direction:column; gap:4px;
+border-bottom:1px solid rgba(255,255,255,0.6);
+padding:7px 8px;
+min-height:50px;
+display:flex; flex-direction:column; gap:5px;
 }
 .bb-status-badge{
 align-self:flex-start;
-font-size:10px; font-weight:700; color:var(–white);
-padding:2px 10px; border-radius:10px;
+font-size:11px; font-weight:800; color:#ffffff;
+padding:2px 12px; border-radius:10px;
+text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 .bb-free{
-font-size:10px; color:rgba(255,255,255,0.8);
+font-size:11px; color:#ffffff;
+font-weight:600;
 line-height:1.5; white-space:pre-wrap;
+text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* 撮影日時行 — ラインなし */
 .bb-time-row{
 display:flex; align-items:center; justify-content:center;
-padding:4px 8px;
-font-size:10px; font-family:monospace; color:var(–gold);
-font-weight:700;
+padding:5px 8px;
+font-size:11px; font-family:monospace; color:#FFD700;
+font-weight:800;
+text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+background: rgba(0,0,0,0.15);
 }
-/* 施工業者行（直前のbb-row）はborder-bottomなし */
-.bb-row.no-bottom{ border-bottom:none; }
 
 /* カメラUI */
 .cam-topbar{
@@ -331,40 +341,6 @@ border-bottom:1px solid var(–green-dark);
 .hist-badge{ font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; color:white; flex-shrink:0; }
 .hist-empty{ display:flex; align-items:center; justify-content:center; flex:1; color:rgba(255,255,255,0.3); font-size:15px; }
 
-/* ===== フリーワード編集モーダル ===== */
-.modal-overlay{
-position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100;
-display:none; align-items:flex-end; justify-content:center;
-}
-.modal-overlay.open{ display:flex; }
-.modal-box{
-background:var(–green-mid); border:1px solid var(–green-light);
-border-radius:16px 16px 0 0; padding:20px 20px calc(env(safe-area-inset-bottom,0px)+20px);
-width:100%; max-width:500px;
-}
-.modal-title{ font-size:14px; font-weight:700; color:white; margin-bottom:12px; }
-.modal-box textarea{
-width:100%; min-height:100px;
-background:var(–green-dark); border:1.5px solid var(–green-light);
-border-radius:10px; padding:12px; font-size:15px;
-font-family:inherit; color:white; outline:none; resize:none;
--webkit-appearance:none;
-}
-.modal-box textarea:focus{ border-color:var(–gold); }
-.modal-box textarea::placeholder{ color:rgba(255,255,255,0.3); }
-.modal-btns{ display:flex; gap:8px; margin-top:12px; }
-.modal-ok{
-flex:1; background:var(–green-board); color:white; border:1px solid var(–green-light);
-border-radius:10px; padding:12px; font-size:14px; font-weight:700;
-font-family:inherit; cursor:pointer;
-}
-.modal-cancel{
-background:var(–green-dark); color:rgba(255,255,255,0.5);
-border:1px solid var(–green-light);
-border-radius:10px; padding:12px 18px; font-size:14px;
-font-family:inherit; cursor:pointer;
-}
-
 /* ===== MISC ===== */
 .flash-overlay{ position:fixed; inset:0; background:white; opacity:0; pointer-events:none; z-index:999; transition:opacity 0.06s; }
 .flash-overlay.on{ opacity:1; }
@@ -382,19 +358,6 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 
 <div class="flash-overlay" id="flashOverlay"></div>
 <div class="toast" id="toast"></div>
-
-<!-- フリーワード編集モーダル -->
-
-<div class="modal-overlay" id="freeModal">
-  <div class="modal-box">
-    <div class="modal-title">📝 中段フリーテキスト編集</div>
-    <textarea id="freeInput" placeholder="例：既存シーリング撤去&#10;プライマー塗布完了"></textarea>
-    <div class="modal-btns">
-      <button class="modal-ok" onclick="saveFree()">決定</button>
-      <button class="modal-cancel" onclick="closeFreeModal()">キャンセル</button>
-    </div>
-  </div>
-</div>
 
 <!-- ===== HOME ===== -->
 
@@ -424,19 +387,22 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 </div>
 
 <div class="card">
-  <div class="card-title">作業ステータス</div>
-  <div class="status-grid">
+  <div class="card-title">作業ステータス（4択）</div>
+  <div class="status-grid4">
     <button class="status-opt sel-mae" data-val="作業前" onclick="selectStatus(this)">作業前</button>
     <button class="status-opt" data-val="作業中" onclick="selectStatus(this)">作業中</button>
     <button class="status-opt" data-val="作業後" onclick="selectStatus(this)">作業後</button>
+    <button class="status-opt" data-val="フリー" onclick="selectStatus(this)">フリー</button>
+  </div>
+  <div id="freeStatusWrap" style="display:none;margin-top:10px;">
+    <input type="text" id="freeStatusInput" placeholder="例：絶縁測定・試運転 など"
+      style="width:100%;background:#0f2a0f;border:2px solid #FFD700;border-radius:10px;
+             padding:11px 14px;font-size:15px;font-family:inherit;color:#FFD700;
+             outline:none;-webkit-appearance:none;"
+      oninput="onFreeStatusInput(this.value)">
   </div>
 </div>
 
-<div class="card">
-  <div class="card-title">中段フリーテキスト（黒板の空欄部分）</div>
-  <div style="background:var(--green-dark);border:1px solid var(--green-light);border-radius:8px;padding:10px 12px;min-height:52px;font-size:13px;color:rgba(255,255,255,0.7);white-space:pre-wrap;word-break:break-all;line-height:1.6;" id="freePreview">（未入力）</div>
-  <button onclick="openFreeModal()" style="margin-top:10px;width:100%;background:var(--green-dark);border:1px solid var(--green-light);border-radius:8px;padding:10px;color:rgba(255,255,255,0.6);font-size:13px;font-family:inherit;cursor:pointer;">✏️ 編集する</button>
-</div>
 
 <div class="card">
   <div class="card-title">撮影日時の表示</div>
@@ -573,12 +539,12 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 // ===== STATE =====
 const S = {
   projectName:'', location:'', workType:'', contractor:'',
-  freeText:'', status:'作業前', seq:1,
+  status:'作業前', freeStatusText:'', seq:1,
   showTime: true,
   bbX:12, bbY:-1,
 };
-const SC = { '作業前':'#2563eb', '作業中':'#ea580c', '作業後':'#16a34a' };
-const SS = { '作業前':'sel-mae', '作業中':'sel-chu', '作業後':'sel-ato' };
+const SC = { '作業前':'#2563eb', '作業中':'#ea580c', '作業後':'#16a34a', 'フリー':'#b45309' };
+const SS = { '作業前':'sel-mae', '作業中':'sel-chu', '作業後':'sel-ato', 'フリー':'sel-free' };
 
 let stream=null, facing='environment', flashOn=false, clockTimer=null;
 
@@ -623,7 +589,6 @@ function refreshHome(){
   document.getElementById('workType').value    = S.workType||'';
   document.getElementById('contractor').value  = S.contractor||'';
   document.getElementById('seqDisplay').textContent = pad(S.seq);
-  document.getElementById('freePreview').textContent = S.freeText||'（未入力）';
   refreshHint(); refreshStatusBtns(); refreshTimeToggle();
 }
 function toggleShowTime(){
@@ -654,10 +619,25 @@ function refreshHint(){ document.getElementById('seqHint').textContent=buildFnam
 function refreshStatusBtns(){
   document.querySelectorAll('.status-opt').forEach(b=>{
     b.className='status-opt';
-    if(b.dataset.val===S.status) b.classList.add(SS[S.status]);
+    if(b.dataset.val===S.status){
+      if(S.status==='フリー') b.classList.add('sel-free');
+      else b.classList.add(SS[S.status]);
+    }
   });
+  // フリー入力欄の表示切替
+  const wrap=document.getElementById('freeStatusWrap');
+  if(wrap) wrap.style.display = S.status==='フリー' ? 'block' : 'none';
+  const inp=document.getElementById('freeStatusInput');
+  if(inp && S.status==='フリー') inp.value=S.freeStatusText||'';
 }
-function selectStatus(el){ S.status=el.dataset.val; refreshStatusBtns(); refreshHint(); save(); }
+function selectStatus(el){
+  S.status=el.dataset.val;
+  refreshStatusBtns(); refreshHint(); save();
+}
+function onFreeStatusInput(val){
+  S.freeStatusText=val; save();
+  refreshBlackboard();
+}
 function changeSeq(d){ S.seq=Math.max(1,S.seq+d); document.getElementById('seqDisplay').textContent=pad(S.seq); refreshHint(); save(); }
 function resetSeq(){
   if(!confirm('連番を1にリセットしますか？')) return;
@@ -668,17 +648,6 @@ function resetSeq(){
 });
 
 // ===== フリーテキストモーダル =====
-function openFreeModal(){
-  document.getElementById('freeInput').value=S.freeText||'';
-  document.getElementById('freeModal').classList.add('open');
-  setTimeout(()=>document.getElementById('freeInput').focus(),100);
-}
-function closeFreeModal(){ document.getElementById('freeModal').classList.remove('open'); }
-function saveFree(){
-  S.freeText=document.getElementById('freeInput').value;
-  document.getElementById('freePreview').textContent=S.freeText||'（未入力）';
-  save(); closeFreeModal();
-}
 
 // ===== CAMERA =====
 async function startCamera(){
@@ -718,19 +687,28 @@ function tickClock(){ document.getElementById('bbTime').textContent=nowStr(); }
 function refreshBlackboard(){
   const c=SC[S.status]||'#666';
   const badge=document.getElementById('bbBadge');
-  badge.textContent=S.status; badge.style.background=c;
+  // フリー選択時はカスタムテキストを表示、3択バッジは非表示
+  if(S.status==='フリー'){
+    badge.textContent = S.freeStatusText || '（未設定）';
+    badge.style.background = '#b45309';
+    badge.style.display = 'inline-block';
+  } else {
+    badge.textContent = S.status;
+    badge.style.background = c;
+    badge.style.display = 'inline-block';
+  }
   document.getElementById('bbProject').textContent   = S.projectName||'—';
   document.getElementById('bbLocation').textContent  = S.location||'—';
   document.getElementById('bbWorkType').textContent  = S.workType||'—';
   document.getElementById('bbContractor').textContent= S.contractor||'—';
-  document.getElementById('bbFree').textContent      = S.freeText||'';
-  document.getElementById('statusLabel').textContent = S.status;
+  document.getElementById('bbFree').textContent      = '';  // フリーステータスのテキストはバッジで表示
+  document.getElementById('statusLabel').textContent = S.status==='フリー' ? (S.freeStatusText||'フリー').slice(0,5) : S.status;
   document.getElementById('camSeqNum').textContent   = pad(S.seq);
   refreshTimeToggle();
 }
 
 function cycleStatus(){
-  const opts=['作業前','作業中','作業後'];
+  const opts=['作業前','作業中','作業後','フリー'];
   S.status=opts[(opts.indexOf(S.status)+1)%3];
   refreshBlackboard(); save();
 }
@@ -855,13 +833,19 @@ function drawBBOnCanvas(ctx,cw,ch){
 
   ctx.save();
 
-  // 外枠
+  // ★ 背景を完全な不透明緑で塗る（透明バグ修正）
+  ctx.globalAlpha=1.0;
   ctx.fillStyle='#2d6e2d';
   rrect(ctx,bx,by,bw,bh,4*sx); ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=2*sx;
+  ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=2*sx;
   rrect(ctx,bx,by,bw,bh,4*sx); ctx.stroke();
 
-  const fs=11*sx, lh=22*sy, kw=58*sx, p=7*sx;
+  const fs=Math.max(13,13*sx);
+  const lh=Math.max(26,26*sy);
+  const kw=66*sx, p=8*sx;
+
+  ctx.textBaseline='middle';
+  ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=2;
 
   const rows=[
     ['工事件名', S.projectName||'—'],
@@ -871,74 +855,83 @@ function drawBBOnCanvas(ctx,cw,ch){
 
   let y=by;
 
-  // 上部3行
   rows.forEach(([k,v])=>{
-    // キー背景
-    ctx.fillStyle='rgba(0,0,0,0.15)';
+    ctx.fillStyle='rgba(0,0,0,0.22)';
     ctx.fillRect(bx,y,kw,lh);
-    // 区切り線
-    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1;
+    ctx.strokeStyle='rgba(255,255,255,0.65)'; ctx.lineWidth=1;
     ctx.beginPath(); ctx.moveTo(bx,y+lh); ctx.lineTo(bx+bw,y+lh); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(bx+kw,y); ctx.lineTo(bx+kw,y+lh); ctx.stroke();
 
-    ctx.font=`700 ${fs}px -apple-system,sans-serif`;
-    ctx.fillStyle='white'; ctx.textBaseline='middle';
-    ctx.fillText(k,bx+4*sx,y+lh/2);
-    ctx.font=`500 ${fs}px -apple-system,sans-serif`;
-    ctx.fillText(v,bx+kw+p,y+lh/2);
+    ctx.font=`800 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle='#ffffff';
+    ctx.fillText(k, bx+4*sx, y+lh/2);
+
+    ctx.font=`600 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle='#ffffff';
+    fitText(ctx, v, bx+kw+p, y+lh/2, bw-kw-p*2);
     y+=lh;
   });
 
-  // 中段スペース（ステータス＋フリー）
-  const midH=52*sy;
-  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1;
+  // 中段
+  const midH=Math.max(54,56*sy);
+  ctx.shadowBlur=0;
+  ctx.strokeStyle='rgba(255,255,255,0.65)'; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(bx,y+midH); ctx.lineTo(bx+bw,y+midH); ctx.stroke();
 
-  // ステータスバッジ
   const bc=SC[S.status]||'#666';
-  const bt=S.status;
-  ctx.font=`700 ${fs*0.9}px -apple-system,sans-serif`;
-  const bm=ctx.measureText(bt);
-  const badgeW=bm.width+14*sx, badgeH=16*sy;
-  ctx.fillStyle=bc;
-  rrect(ctx,bx+p,y+5*sy,badgeW,badgeH,8*sx); ctx.fill();
-  ctx.fillStyle='white'; ctx.textBaseline='middle';
-  ctx.fillText(bt,bx+p+7*sx,y+5*sy+badgeH/2);
+  ctx.font=`800 ${fs*0.9}px -apple-system,sans-serif`;
+  const badgeTxt=S.status==='フリー'?(S.freeStatusText||'フリー'):S.status;
+  const bm=ctx.measureText(badgeTxt);
+  const bdgW=bm.width+16*sx, bdgH=20*sy;
+  ctx.fillStyle=bc; ctx.shadowBlur=0;
+  rrect(ctx,bx+p,y+5*sy,bdgW,bdgH,10*sx); ctx.fill();
+  ctx.fillStyle='#ffffff'; ctx.shadowColor='rgba(0,0,0,0.5)'; ctx.shadowBlur=2;
+  const badgeLabel = S.status==='フリー' ? (S.freeStatusText||'フリー') : S.status;
+  ctx.fillText(badgeLabel, bx+p+8*sx, y+5*sy+bdgH/2);
 
-  // フリーテキスト
-  if(S.freeText){
-    ctx.font=`500 ${fs*0.95}px -apple-system,sans-serif`;
-    ctx.fillStyle='rgba(255,255,255,0.85)';
-    const lines=S.freeText.split('\n').slice(0,2);
-    lines.forEach((l,i)=>{
-      ctx.fillText(l,bx+p,y+24*sy+(i*13*sy));
-    });
-  }
+  // フリーステータスのテキストはバッジで表示済みのため中段テキスト描画なし
   y+=midH;
 
-  // 施工業者行
-  ctx.fillStyle='rgba(0,0,0,0.15)';
+  // 施工業者
+  ctx.fillStyle='rgba(0,0,0,0.22)';
   ctx.fillRect(bx,y,kw,lh);
-  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(bx,y+lh); ctx.lineTo(bx+bw,y+lh); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.65)'; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(bx+kw,y); ctx.lineTo(bx+kw,y+lh); ctx.stroke();
-  ctx.font=`700 ${fs}px -apple-system,sans-serif`;
-  ctx.fillStyle='white'; ctx.textBaseline='middle';
-  ctx.fillText('施 工 者',bx+4*sx,y+lh/2);
-  ctx.font=`500 ${fs}px -apple-system,sans-serif`;
-  ctx.fillText(S.contractor||'—',bx+kw+p,y+lh/2);
+  ctx.font=`800 ${fs}px -apple-system,sans-serif`;
+  ctx.fillStyle='#ffffff'; ctx.textBaseline='middle';
+  ctx.fillText('施 工 者', bx+4*sx, y+lh/2);
+  ctx.font=`600 ${fs}px -apple-system,sans-serif`;
+  fitText(ctx, S.contractor||'—', bx+kw+p, y+lh/2, bw-kw-p*2);
   y+=lh;
 
-  // 日時行（オフ時はスキップ）
+  // 日時
   if(S.showTime){
-    ctx.font=`700 ${fs*0.95}px monospace`;
-    ctx.fillStyle='#d4a843'; ctx.textBaseline='middle';
-    ctx.textAlign='center';
-    ctx.fillText(nowStr(),bx+bw/2,y+10*sy);
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.fillRect(bx,y,bw,lh*0.9);
+    ctx.font=`800 ${fs*0.95}px monospace`;
+    ctx.fillStyle='#FFD700'; ctx.textAlign='center';
+    ctx.shadowColor='rgba(0,0,0,0.8)'; ctx.shadowBlur=3;
+    ctx.fillText(nowStr(), bx+bw/2, y+lh*0.45);
     ctx.textAlign='left';
   }
 
+  ctx.shadowBlur=0;
   ctx.restore();
+}
+
+// 長いテキストをフォント縮小して1行に収める
+function fitText(ctx,text,x,y,maxW){
+  if(!text) return;
+  const orig=ctx.font;
+  if(ctx.measureText(text).width>maxW){
+    const fsm=orig.match(/([\d.]+)px/);
+    if(fsm){
+      const scale=maxW/ctx.measureText(text).width*0.95;
+      ctx.font=orig.replace(/([\d.]+)px/, (parseFloat(fsm[1])*scale).toFixed(1)+'px');
+    }
+  }
+  ctx.fillText(text,x,y);
+  ctx.font=orig;
 }
 
 function rrect(ctx,x,y,w,h,r){
