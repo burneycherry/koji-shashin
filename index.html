@@ -346,6 +346,16 @@ border-bottom:1px solid var(–green-dark);
 .hist-meta{ font-size:11px; color:rgba(255,255,255,0.45); margin-top:2px; }
 .hist-badge{ font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; color:white; flex-shrink:0; }
 .hist-empty{ display:flex; align-items:center; justify-content:center; flex:1; color:rgba(255,255,255,0.3); font-size:15px; }
+.hist-del-btn{
+background:none; border:1.5px solid #f87171; border-radius:8px;
+color:#f87171; font-size:12px; font-weight:700; font-family:inherit;
+padding:5px 10px; cursor:pointer; flex-shrink:0;
+}
+.hist-del-btn:active{ background:rgba(248,113,113,0.2); }
+.hist-count{
+font-size:12px; color:rgba(255,255,255,0.5);
+padding:10px 16px 6px; font-weight:700;
+}
 
 /* ===== MISC ===== */
 .flash-overlay{ position:fixed; inset:0; background:white; opacity:0; pointer-events:none; z-index:999; transition:opacity 0.06s; }
@@ -536,8 +546,9 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
   <div class="hist-header">
     <button class="hist-back" onclick="goHome()">← 戻る</button>
     <h2>撮影履歴</h2>
-    <button class="hist-clear" onclick="clearHistory()">クリア</button>
+    <button class="hist-clear" onclick="clearHistory()">🗑 一括削除</button>
   </div>
+  <div class="hist-count" id="histCount"></div>
   <div class="hist-list" id="histList"></div>
 </div>
 
@@ -964,27 +975,43 @@ function goHome(){ stopStream(); stopClock(); showScreen('homeScreen'); refreshH
 function showHistory(){
   const h=getHist();
   const list=document.getElementById('histList');
+  const count=document.getElementById('histCount');
   if(!h.length){
+    if(count) count.textContent='';
     list.innerHTML='<div class="hist-empty">📷 まだ撮影履歴がありません</div>';
   } else {
-    list.innerHTML=h.map(item=>{
+    if(count) count.textContent=`${h.length}件`;
+    list.innerHTML=h.map((item,idx)=>{
       const c=SC[item.status]||'#666';
       const dt=new Date(item.capturedAt).toLocaleString('ja-JP');
-      return `<div class="hist-item">
+      const label=item.status==='フリー'?(item.freeStatusText||'フリー'):item.status;
+      return `<div class="hist-item" id="hist-item-${idx}">
         <div class="hist-dot" style="background:${c}"></div>
         <div class="hist-info">
           <div class="hist-fname">${item.fileName}</div>
           <div class="hist-meta">${item.location} / ${item.workType} — ${dt}</div>
         </div>
-        <div class="hist-badge" style="background:${c}">${item.status}</div>
+        <div class="hist-badge" style="background:${c};margin-right:6px">${label}</div>
+        <button class="hist-del-btn" onclick="deleteHistItem(${idx})">削除</button>
       </div>`;
     }).join('');
   }
   showScreen('historyScreen');
 }
+function deleteHistItem(idx){
+  const h=getHist();
+  const item=h[idx];
+  if(!confirm(`この履歴を削除しますか？\n\n📁 ${item.fileName}`)) return;
+  h.splice(idx,1);
+  try{ localStorage.setItem('kjs_h',JSON.stringify(h)); }catch(e){}
+  showHistory();
+}
 function clearHistory(){
-  if(!confirm('撮影履歴をすべて削除しますか？')) return;
-  localStorage.removeItem('kjs_h'); showHistory();
+  const h=getHist();
+  if(!h.length){ alert('削除する履歴がありません。'); return; }
+  if(!confirm(`撮影履歴を全${h.length}件まとめて削除しますか？\nこの操作は元に戻せません。`)) return;
+  localStorage.removeItem('kjs_h');
+  showHistory();
 }
 
 // ===== INIT =====
