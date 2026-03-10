@@ -765,90 +765,110 @@ function initBBPosition(){
 
 (function setupBB(){
   const bb = document.getElementById('blackboard');
-  let dragging=false, startX=0, startY=0, origLeft=0, origTop=0;
-  // ピンチ用
-  let pinching=false, startDist=0, startWidth=270;
-  // 現在の幅を保持（最小200・最大480）
-  let bbWidth = 270;
+  // transform-origin を左上に固定して scale で拡縮
+  bb.style.transformOrigin = 'top left';
 
-  function getPos(){
-    const r=bb.getBoundingClientRect();
-    return { left:r.left, top:r.top };
+  let dragging = false;
+  let startX=0, startY=0, origLeft=0, origTop=0;
+
+  // スケール管理（0.5〜2.0）
+  let bbScale = 1.0;
+  let pinching = false;
+  let startDist = 0, startScale = 1.0;
+
+  function dist(t){
+    return Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
   }
-  function clampPos(left,top){
+  function applyScale(s){
+    bbScale = Math.max(0.5, Math.min(2.0, s));
+    bb.style.transform = `scale(${bbScale})`;
+  }
+  function getLogicalPos(){
+    // getBoundingClientRect は scale後の位置を返すので
+    // style.left / style.top から取る
     return {
-      left: Math.max(0, Math.min(window.innerWidth - bb.offsetWidth, left)),
-      top:  Math.max(0, Math.min(window.innerHeight - bb.offsetHeight, top))
+      left: parseFloat(bb.style.left) || 0,
+      top:  parseFloat(bb.style.top)  || 0
     };
   }
-  function applyWidth(w){
-    bbWidth = Math.max(200, Math.min(480, w));
-    bb.querySelector('.bb-wrap').style.width = bbWidth+'px';
+  function clamp(left, top){
+    // 表示上のサイズ = offsetSize * scale
+    const dispW = bb.offsetWidth  * bbScale;
+    const dispH = bb.offsetHeight * bbScale;
+    return {
+      left: Math.max(0, Math.min(window.innerWidth  - dispW, left)),
+      top:  Math.max(0, Math.min(window.innerHeight - dispH, top))
+    };
   }
-  function dist(t){ return Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY); }
 
-  bb.addEventListener('touchstart',e=>{
-    if(e.touches.length===2){
-      // ピンチ開始
-      pinching=true; dragging=false;
-      startDist=dist(e.touches);
-      startWidth=bbWidth;
+  // ===== タッチ =====
+  bb.addEventListener('touchstart', e=>{
+    if(e.touches.length === 2){
+      pinching = true;
+      dragging = false;
+      startDist  = dist(e.touches);
+      startScale = bbScale;
       e.preventDefault();
-    } else if(e.touches.length===1 && !pinching){
-      // ドラッグ開始
-      dragging=true;
-      const pos=getPos();
-      origLeft=pos.left; origTop=pos.top;
-      startX=e.touches[0].clientX; startY=e.touches[0].clientY;
-      bb.style.left=origLeft+'px'; bb.style.top=origTop+'px'; bb.style.bottom='auto';
+    } else if(e.touches.length === 1 && !pinching){
+      dragging = true;
+      const pos = getLogicalPos();
+      origLeft = pos.left; origTop = pos.top;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      bb.style.bottom = 'auto';
       e.preventDefault();
     }
   },{passive:false});
 
-  bb.addEventListener('touchmove',e=>{
-    if(pinching && e.touches.length===2){
-      const d=dist(e.touches);
-      applyWidth(startWidth * (d/startDist));
+  bb.addEventListener('touchmove', e=>{
+    if(pinching && e.touches.length === 2){
+      const d = dist(e.touches);
+      applyScale(startScale * (d / startDist));
       e.preventDefault();
-    } else if(dragging && e.touches.length===1){
-      const dx=e.touches[0].clientX-startX, dy=e.touches[0].clientY-startY;
-      const p=clampPos(origLeft+dx, origTop+dy);
-      bb.style.left=p.left+'px'; bb.style.top=p.top+'px';
+    } else if(dragging && e.touches.length === 1){
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      const p  = clamp(origLeft + dx, origTop + dy);
+      bb.style.left = p.left + 'px';
+      bb.style.top  = p.top  + 'px';
       e.preventDefault();
     }
   },{passive:false});
 
-  bb.addEventListener('touchend',e=>{
-    if(e.touches.length < 2) pinching=false;
-    if(e.touches.length === 0) dragging=false;
+  bb.addEventListener('touchend', e=>{
+    if(e.touches.length < 2) pinching = false;
+    if(e.touches.length === 0) dragging = false;
   });
 
-  // マウス（PC確認用）
-  bb.addEventListener('mousedown',e=>{
-    dragging=true;
-    const pos=getPos();
-    origLeft=pos.left; origTop=pos.top;
-    startX=e.clientX; startY=e.clientY;
-    bb.style.left=origLeft+'px'; bb.style.top=origTop+'px'; bb.style.bottom='auto';
+  // ===== マウス（PC確認用）=====
+  bb.addEventListener('mousedown', e=>{
+    dragging = true;
+    const pos = getLogicalPos();
+    origLeft = pos.left; origTop = pos.top;
+    startX = e.clientX; startY = e.clientY;
+    bb.style.bottom = 'auto';
     e.preventDefault();
   });
-  document.addEventListener('mousemove',e=>{
+  document.addEventListener('mousemove', e=>{
     if(!dragging) return;
-    const p=clampPos(origLeft+(e.clientX-startX), origTop+(e.clientY-startY));
-    bb.style.left=p.left+'px'; bb.style.top=p.top+'px';
+    const p = clamp(origLeft+(e.clientX-startX), origTop+(e.clientY-startY));
+    bb.style.left = p.left+'px';
+    bb.style.top  = p.top +'px';
   });
-  document.addEventListener('mouseup',()=>{ dragging=false; });
+  document.addEventListener('mouseup', ()=>{ dragging=false; });
 
-  // ② 縦横回転で黒板位置をクランプ（画面外に出ないよう）
-  function onOrientationChange(){
+  // ===== 縦横回転：画面外に出ないようクランプ =====
+  function onResize(){
     setTimeout(()=>{
-      const r=bb.getBoundingClientRect();
-      const p=clampPos(r.left, r.top);
-      bb.style.left=p.left+'px'; bb.style.top=p.top+'px'; bb.style.bottom='auto';
+      const pos = getLogicalPos();
+      const p = clamp(pos.left, pos.top);
+      bb.style.left = p.left+'px';
+      bb.style.top  = p.top +'px';
+      bb.style.bottom = 'auto';
     }, 300);
   }
-  window.addEventListener('orientationchange', onOrientationChange);
-  window.addEventListener('resize', onOrientationChange);
+  window.addEventListener('orientationchange', onResize);
+  window.addEventListener('resize', onResize);
 })();
 
 // ===== CAPTURE =====
