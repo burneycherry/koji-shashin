@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="工事写真帳">
+<title>工事写真帳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d2137;
+  --navy2: #1a3a5c;
+  --blue: #2563eb;
+  --blue-light: #dbeafe;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --orange: #ea580c;
+  --orange-light: #ffedd5;
+  --gold: #d97706;
+  --white: #ffffff;
+  --gray50: #f8fafc;
+  --gray100: #f1f5f9;
+  --gray200: #e2e8f0;
+  --gray400: #94a3b8;
+  --gray600: #475569;
+  --gray800: #1e293b;
+  --text: #0f172a;
+  --shadow: 0 4px 24px rgba(0,0,0,0.12);
+  --radius: 14px;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+font-family: ‘Noto Sans JP’, sans-serif;
+background: var(–navy);
+color: var(–white);
+height: 100dvh;
+overflow: hidden;
+user-select: none;
+}
+
+/* ======== SCREENS ======== */
+.screen {
+position: absolute;
+inset: 0;
+display: none;
+flex-direction: column;
+overflow-y: auto;
+}
+.screen.active { display: flex; }
+
+/* ======== HOME SCREEN ======== */
+#homeScreen {
+background: var(–gray50);
+color: var(–text);
+}
+
+.home-header {
+background: var(–navy);
+padding: 52px 20px 20px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-shrink: 0;
+}
+.home-header h1 {
+font-size: 22px;
+font-weight: 900;
+color: white;
+letter-spacing: -0.3px;
+}
+.home-header p { font-size: 12px; color: var(–gray400); margin-top: 2px; }
+
+.history-btn-header {
+background: rgba(255,255,255,0.12);
+border: none;
+color: white;
+font-size: 11px;
+font-family: ‘Noto Sans JP’, sans-serif;
+padding: 8px 14px;
+border-radius: 20px;
+cursor: pointer;
+}
+
+.home-body {
+flex: 1;
+padding: 16px;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+}
+
+.card {
+background: white;
+border-radius: var(–radius);
+padding: 16px;
+margin-bottom: 12px;
+box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.card-title {
+font-size: 12px;
+font-weight: 700;
+color: var(–gray400);
+text-transform: uppercase;
+letter-spacing: 0.8px;
+margin-bottom: 12px;
+}
+
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+display: flex;
+align-items: center;
+gap: 6px;
+font-size: 12px;
+font-weight: 700;
+color: var(–gray600);
+margin-bottom: 6px;
+}
+.req { color: #ef4444; font-size: 10px; }
+.opt { color: var(–gray400); font-size: 10px; }
+
+.field input {
+width: 100%;
+border: 1.5px solid var(–gray200);
+border-radius: 10px;
+padding: 11px 14px;
+font-size: 15px;
+font-family: ‘Noto Sans JP’, sans-serif;
+color: var(–text);
+background: var(–gray50);
+outline: none;
+transition: border-color 0.2s;
+}
+.field input:focus { border-color: var(–blue); background: white; }
+.field input::placeholder { color: var(–gray400); }
+
+/* ステータス選択 */
+.status-grid {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr;
+gap: 8px;
+}
+.status-opt {
+padding: 10px 4px;
+border-radius: 10px;
+border: 2px solid var(–gray200);
+background: white;
+font-size: 13px;
+font-weight: 700;
+font-family: ‘Noto Sans JP’, sans-serif;
+color: var(–gray600);
+cursor: pointer;
+text-align: center;
+transition: all 0.15s;
+}
+.status-opt.active-mae  { border-color: var(–blue);   background: var(–blue-light);   color: var(–blue); }
+.status-opt.active-chu  { border-color: var(–orange);  background: var(–orange-light); color: var(–orange); }
+.status-opt.active-go   { border-color: var(–green);   background: var(–green-light);  color: var(–green); }
+
+/* 連番エリア */
+.seq-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+.seq-display {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 36px;
+font-weight: 600;
+color: var(–navy2);
+}
+.seq-actions { display: flex; gap: 8px; }
+.seq-btn {
+width: 40px; height: 40px;
+border-radius: 10px;
+border: 1.5px solid var(–gray200);
+background: white;
+font-size: 20px;
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+}
+.seq-hint {
+margin-top: 10px;
+font-size: 11px;
+color: var(–gray400);
+background: var(–gray50);
+border-radius: 8px;
+padding: 8px 10px;
+line-height: 1.6;
+word-break: break-all;
+font-family: ‘JetBrains Mono’, monospace;
+}
+.seq-hint strong { color: var(–navy2); }
+
+/* 撮影開始ボタン */
+.start-btn {
+width: 100%;
+background: var(–navy2);
+color: white;
+border: none;
+border-radius: var(–radius);
+padding: 18px;
+font-size: 18px;
+font-weight: 900;
+font-family: ‘Noto Sans JP’, sans-serif;
+cursor: pointer;
+letter-spacing: 0.5px;
+margin-bottom: 10px;
+box-shadow: 0 4px 20px rgba(26,58,92,0.35);
+transition: transform 0.1s, box-shadow 0.1s;
+display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.start-btn:active { transform: scale(0.98); box-shadow: 0 2px 10px rgba(26,58,92,0.25); }
+.start-btn.disabled { opacity: 0.4; }
+
+/* ======== CAMERA SCREEN ======== */
+#cameraScreen {
+background: #000;
+position: relative;
+}
+
+#videoEl {
+position: absolute;
+inset: 0;
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+/* 電子黒板 */
+.blackboard {
+position: absolute;
+bottom: 150px;
+left: 10px;
+background: rgba(10, 30, 10, 0.87);
+border: 2px solid #8B6914;
+border-radius: 8px;
+padding: 10px 12px;
+min-width: 220px;
+max-width: 70vw;
+z-index: 10;
+backdrop-filter: blur(2px);
+}
+.bb-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 6px;
+padding-bottom: 6px;
+border-bottom: 1px solid rgba(139,105,20,0.5);
+}
+.bb-title { color: white; font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+.bb-badge {
+font-size: 10px;
+font-weight: 700;
+padding: 2px 8px;
+border-radius: 10px;
+color: white;
+}
+.bb-row { display: flex; gap: 6px; margin-bottom: 4px; }
+.bb-row:last-child { margin-bottom: 0; }
+.bb-label { color: #7ec8e3; font-size: 10px; min-width: 52px; flex-shrink: 0; }
+.bb-val { color: white; font-size: 10px; font-weight: 500; flex: 1; }
+.bb-time { color: #FFD700; font-size: 10px; font-weight: 700; font-family: ‘JetBrains Mono’, monospace; }
+
+/* カメラ上部バー */
+.cam-topbar {
+position: absolute;
+top: 0; left: 0; right: 0;
+z-index: 20;
+background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+padding: 50px 16px 20px;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+}
+.cam-close {
+width: 40px; height: 40px;
+border-radius: 20px;
+background: rgba(0,0,0,0.5);
+border: none; color: white; font-size: 20px;
+cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.cam-seq {
+text-align: center;
+}
+.cam-seq-num {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 28px;
+font-weight: 600;
+color: white;
+line-height: 1;
+}
+.cam-seq-label { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+.cam-flash {
+width: 40px; height: 40px;
+border-radius: 20px;
+background: rgba(0,0,0,0.5);
+border: none; color: white; font-size: 18px;
+cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+/* カメラ下部バー */
+.cam-bottombar {
+position: absolute;
+bottom: 0; left: 0; right: 0;
+z-index: 20;
+background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+padding: 20px 16px 44px;
+display: flex;
+justify-content: space-around;
+align-items: center;
+}
+
+.cam-side-btn {
+display: flex; flex-direction: column; align-items: center; gap: 4px;
+background: none; border: none; color: white; cursor: pointer;
+min-width: 64px;
+}
+.cam-side-btn span:first-child { font-size: 28px; }
+.cam-side-label { font-size: 10px; opacity: 0.8; font-family: ‘Noto Sans JP’, sans-serif; }
+
+/* シャッター */
+.shutter {
+width: 76px; height: 76px;
+border-radius: 50%;
+background: white;
+border: 4px solid rgba(255,255,255,0.4);
+display: flex; align-items: center; justify-content: center;
+cursor: pointer;
+transition: transform 0.1s;
+}
+.shutter:active { transform: scale(0.92); }
+.shutter-inner {
+width: 60px; height: 60px;
+border-radius: 50%;
+background: white;
+border: 2px solid #ddd;
+}
+.shutter.saving .shutter-inner {
+background: var(–gray200);
+animation: pulse 0.6s infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ======== PREVIEW SCREEN ======== */
+#previewScreen {
+background: #0a0a0a;
+}
+.preview-img-wrap {
+flex: 1;
+display: flex;
+align-items: center;
+justify-content: center;
+background: #000;
+min-height: 0;
+}
+#previewImg {
+max-width: 100%;
+max-height: 100%;
+object-fit: contain;
+}
+.preview-footer {
+background: #111;
+padding: 16px 16px 40px;
+flex-shrink: 0;
+}
+.preview-filename {
+background: #1a1a1a;
+border-radius: 10px;
+padding: 10px 14px;
+margin-bottom: 14px;
+}
+.preview-filename-label { font-size: 10px; color: var(–gray400); margin-bottom: 4px; }
+.preview-filename-val {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 12px;
+color: #FFD700;
+word-break: break-all;
+}
+.preview-btns { display: flex; gap: 10px; }
+.preview-continue {
+flex: 1;
+background: var(–navy2);
+color: white;
+border: none;
+border-radius: 12px;
+padding: 15px;
+font-size: 15px;
+font-weight: 700;
+font-family: ‘Noto Sans JP’, sans-serif;
+cursor: pointer;
+}
+.preview-home {
+background: #222;
+color: var(–gray400);
+border: none;
+border-radius: 12px;
+padding: 15px 18px;
+font-size: 13px;
+font-family: ‘Noto Sans JP’, sans-serif;
+cursor: pointer;
+}
+.save-toast {
+text-align: center;
+font-size: 12px;
+color: #4ade80;
+padding: 8px 0 4px;
+}
+
+/* ======== HISTORY SCREEN ======== */
+#historyScreen {
+background: var(–gray50);
+color: var(–text);
+}
+.hist-header {
+background: var(–navy);
+padding: 52px 16px 16px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-shrink: 0;
+}
+.hist-header h2 { color: white; font-size: 18px; font-weight: 900; }
+.hist-back {
+background: none; border: none; color: white; font-size: 14px;
+cursor: pointer; font-family: ‘Noto Sans JP’, sans-serif; padding: 4px;
+}
+.hist-clear {
+background: none; border: none; color: #f87171; font-size: 13px;
+cursor: pointer; font-family: ‘Noto Sans JP’, sans-serif;
+}
+.hist-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.hist-item {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 12px 16px;
+background: white;
+border-bottom: 1px solid var(–gray100);
+}
+.hist-dot {
+width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.hist-info { flex: 1; min-width: 0; }
+.hist-fname {
+font-size: 12px; font-weight: 700;
+font-family: ‘JetBrains Mono’, monospace;
+color: var(–text);
+white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hist-meta { font-size: 11px; color: var(–gray400); margin-top: 2px; }
+.hist-badge {
+font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; color: white; flex-shrink: 0;
+}
+.hist-empty {
+display: flex; align-items: center; justify-content: center;
+flex: 1; color: var(–gray400); font-size: 15px;
+}
+
+/* ======== FLASH EFFECT ======== */
+.flash-overlay {
+position: fixed; inset: 0; background: white;
+opacity: 0; pointer-events: none; z-index: 9999;
+transition: opacity 0.05s;
+}
+.flash-overlay.flash { opacity: 1; }
+
+/* ======== ERROR TOAST ======== */
+.toast {
+position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+background: rgba(239,68,68,0.95); color: white;
+padding: 12px 20px; border-radius: 100px; font-size: 13px;
+z-index: 9999; opacity: 0; transition: opacity 0.3s;
+white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+</style>
+
+</head>
+<body>
+
+<div class="flash-overlay" id="flashOverlay"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ===== HOME ===== -->
+
+<div class="screen active" id="homeScreen">
+  <div class="home-header">
+    <div>
+      <h1>📋 工事写真帳</h1>
+      <p>電子黒板カメラ</p>
+    </div>
+    <button class="history-btn-header" onclick="showHistory()">📂 履歴</button>
+  </div>
+
+  <div class="home-body">
+    <div class="card">
+      <div class="card-title">工事情報</div>
+
+```
+  <div class="field">
+    <label>工事名 <span class="opt">任意</span></label>
+    <input type="text" id="projectName" placeholder="例：〇〇邸 外壁改修工事">
+  </div>
+  <div class="field">
+    <label>施工場所 <span class="req">＊必須</span></label>
+    <input type="text" id="location" placeholder="例：〇〇邸外壁 / A棟1F廊下">
+  </div>
+  <div class="field">
+    <label>工種 <span class="req">＊必須</span></label>
+    <input type="text" id="workType" placeholder="例：塗装工事 / 防水工事">
+  </div>
+  <div class="field">
+    <label>施工業者名 <span class="opt">任意</span></label>
+    <input type="text" id="contractor" placeholder="例：〇〇建設株式会社">
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">作業ステータス</div>
+  <div class="status-grid">
+    <button class="status-opt active-mae" data-val="作業前" onclick="selectStatus(this)">作業前</button>
+    <button class="status-opt" data-val="作業中" onclick="selectStatus(this)">作業中</button>
+    <button class="status-opt" data-val="作業後" onclick="selectStatus(this)">作業後</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">連番管理</div>
+  <div class="seq-row">
+    <div class="seq-display" id="seqDisplay">001</div>
+    <div class="seq-actions">
+      <button class="seq-btn" onclick="changeSeq(-1)">−</button>
+      <button class="seq-btn" onclick="changeSeq(1)">＋</button>
+      <button class="seq-btn" onclick="resetSeq()" title="リセット">↺</button>
+    </div>
+  </div>
+  <div class="seq-hint" id="seqHint">施工場所_工種_作業前_001.jpg</div>
+</div>
+
+<button class="start-btn" id="startBtn" onclick="startCamera()">
+  <span>📷</span><span>撮影を開始する</span>
+</button>
+```
+
+  </div>
+</div>
+
+<!-- ===== CAMERA ===== -->
+
+<div class="screen" id="cameraScreen">
+  <video id="videoEl" autoplay playsinline muted></video>
+
+  <!-- 電子黒板 -->
+
+  <div class="blackboard" id="blackboard">
+    <div class="bb-header">
+      <span class="bb-title">📋 工事写真</span>
+      <span class="bb-badge" id="bbBadge">作業前</span>
+    </div>
+    <div id="bbProjectRow" class="bb-row">
+      <span class="bb-label">工事名</span>
+      <span class="bb-val" id="bbProject">—</span>
+    </div>
+    <div class="bb-row">
+      <span class="bb-label">施工場所</span>
+      <span class="bb-val" id="bbLocation">—</span>
+    </div>
+    <div class="bb-row">
+      <span class="bb-label">工種</span>
+      <span class="bb-val" id="bbWorkType">—</span>
+    </div>
+    <div id="bbContractorRow" class="bb-row">
+      <span class="bb-label">施工業者</span>
+      <span class="bb-val" id="bbContractor">—</span>
+    </div>
+    <div class="bb-row">
+      <span class="bb-label">撮影日時</span>
+      <span class="bb-time" id="bbTime">—</span>
+    </div>
+  </div>
+
+  <!-- 上部バー -->
+
+  <div class="cam-topbar">
+    <button class="cam-close" onclick="stopCamera()">✕</button>
+    <div class="cam-seq">
+      <div class="cam-seq-num" id="camSeqNum">001</div>
+      <div class="cam-seq-label">連番</div>
+    </div>
+    <button class="cam-flash" id="flashBtn" onclick="toggleFlash()">⚡</button>
+  </div>
+
+  <!-- 下部バー -->
+
+  <div class="cam-bottombar">
+    <button class="cam-side-btn" onclick="cycleStatus()">
+      <span>📝</span>
+      <span class="cam-side-label" id="statusLabel">作業前</span>
+    </button>
+    <div class="shutter" id="shutterBtn" onclick="capture()">
+      <div class="shutter-inner"></div>
+    </div>
+    <button class="cam-side-btn" onclick="flipCamera()">
+      <span>🔄</span>
+      <span class="cam-side-label">反転</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== PREVIEW ===== -->
+
+<div class="screen" id="previewScreen">
+  <div class="preview-img-wrap">
+    <img id="previewImg" src="" alt="preview">
+  </div>
+  <div class="preview-footer">
+    <div class="save-toast">✅ カメラロールに保存しました（長押しで保存）</div>
+    <div class="preview-filename">
+      <div class="preview-filename-label">📁 ファイル名</div>
+      <div class="preview-filename-val" id="previewFname">—</div>
+    </div>
+    <div class="preview-btns">
+      <button class="preview-continue" onclick="continueCapture()">📷 続けて撮影</button>
+      <button class="preview-home" onclick="goHome()">🏠 設定変更</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HISTORY ===== -->
+
+<div class="screen" id="historyScreen">
+  <div class="hist-header">
+    <button class="hist-back" onclick="goHome()">← 戻る</button>
+    <h2>撮影履歴</h2>
+    <button class="hist-clear" onclick="clearHistory()">クリア</button>
+  </div>
+  <div class="hist-list" id="histList"></div>
+</div>
+
+<script>
+// ======== STATE ========
+const S = {
+  projectName: '',
+  location: '',
+  workType: '',
+  contractor: '',
+  status: '作業前',
+  seq: 1,
+};
+
+let stream = null;
+let facing = 'environment';
+let flashOn = false;
+let clockTimer = null;
+let lastPhotoDataUrl = null;
+let lastFileName = '';
+
+const STATUS_COLORS = { '作業前': '#2563eb', '作業中': '#ea580c', '作業後': '#16a34a' };
+const STATUS_CLASSES = { '作業前': 'active-mae', '作業中': 'active-chu', '作業後': 'active-go' };
+
+// ======== PERSISTENCE ========
+function saveState() {
+  localStorage.setItem('kjs_state', JSON.stringify(S));
+}
+function loadState() {
+  try {
+    const d = JSON.parse(localStorage.getItem('kjs_state') || '{}');
+    Object.assign(S, d);
+  } catch(e) {}
+}
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('kjs_history') || '[]'); } catch(e) { return []; }
+}
+function addHistory(item) {
+  const h = getHistory();
+  h.unshift(item);
+  if (h.length > 300) h.pop();
+  localStorage.setItem('kjs_history', JSON.stringify(h));
+}
+
+// ======== UTILS ========
+function pad(n, d=3) { return String(n).padStart(d,'0'); }
+function sanitize(s) {
+  if (!s) return '';
+  return s.trim().replace(/[\\/:*?"<>|\s]/g,'').slice(0,30);
+}
+function buildFileName() {
+  const parts = [];
+  if (S.location) parts.push(sanitize(S.location));
+  if (S.workType)  parts.push(sanitize(S.workType));
+  parts.push(S.status);
+  parts.push(pad(S.seq));
+  return parts.join('_') + '.jpg';
+}
+function formatTime(d=new Date()) {
+  const y=d.getFullYear(), m=pad(d.getMonth()+1,2), dd=pad(d.getDate(),2);
+  const h=pad(d.getHours(),2), mi=pad(d.getMinutes(),2), s=pad(d.getSeconds(),2);
+  return `${y}/${m}/${dd} ${h}:${mi}:${s}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ======== HOME ========
+function updateHomeUI() {
+  document.getElementById('projectName').value = S.projectName;
+  document.getElementById('location').value    = S.location;
+  document.getElementById('workType').value    = S.workType;
+  document.getElementById('contractor').value  = S.contractor;
+  document.getElementById('seqDisplay').textContent = pad(S.seq);
+  updateSeqHint();
+  updateStatusButtons();
+}
+
+function updateSeqHint() {
+  document.getElementById('seqHint').textContent = buildFileName();
+}
+
+function updateStatusButtons() {
+  document.querySelectorAll('.status-opt').forEach(b => {
+    b.className = 'status-opt';
+    if (b.dataset.val === S.status) b.classList.add(STATUS_CLASSES[S.status]);
+  });
+}
+
+function selectStatus(el) {
+  S.status = el.dataset.val;
+  updateStatusButtons();
+  updateSeqHint();
+  saveState();
+}
+
+function changeSeq(d) {
+  S.seq = Math.max(1, S.seq + d);
+  document.getElementById('seqDisplay').textContent = pad(S.seq);
+  updateSeqHint();
+  saveState();
+}
+
+function resetSeq() {
+  if (!confirm('連番を1にリセットしますか？')) return;
+  S.seq = 1;
+  document.getElementById('seqDisplay').textContent = '001';
+  updateSeqHint();
+  saveState();
+}
+
+// 入力イベント
+['projectName','location','workType','contractor'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => {
+    S[id] = e.target.value;
+    updateSeqHint();
+    saveState();
+  });
+});
+
+// ======== CAMERA ========
+async function startCamera() {
+  S.location = document.getElementById('location').value.trim();
+  S.workType  = document.getElementById('workType').value.trim();
+  S.projectName = document.getElementById('projectName').value.trim();
+  S.contractor  = document.getElementById('contractor').value.trim();
+
+  if (!S.location || !S.workType) {
+    showToast('⚠ 施工場所と工種を入力してください');
+    return;
+  }
+  saveState();
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    document.getElementById('videoEl').srcObject = stream;
+    showScreen('cameraScreen');
+    updateBlackboard();
+    startClock();
+  } catch(e) {
+    showToast('⚠ カメラを起動できませんでした');
+  }
+}
+
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  stopClock();
+  showScreen('homeScreen');
+}
+
+function startClock() {
+  stopClock();
+  clockTimer = setInterval(updateClock, 1000);
+  updateClock();
+}
+function stopClock() {
+  if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
+}
+function updateClock() {
+  document.getElementById('bbTime').textContent = formatTime();
+}
+
+function updateBlackboard() {
+  const c = STATUS_COLORS[S.status] || '#666';
+  const badge = document.getElementById('bbBadge');
+  badge.textContent = S.status;
+  badge.style.background = c;
+
+  document.getElementById('bbProject').textContent   = S.projectName || '—';
+  document.getElementById('bbLocation').textContent  = S.location || '—';
+  document.getElementById('bbWorkType').textContent  = S.workType || '—';
+  document.getElementById('bbContractor').textContent= S.contractor || '—';
+
+  // 空欄の行を隠す
+  document.getElementById('bbProjectRow').style.display    = S.projectName  ? 'flex' : 'none';
+  document.getElementById('bbContractorRow').style.display = S.contractor   ? 'flex' : 'none';
+
+  document.getElementById('statusLabel').textContent = S.status;
+  document.getElementById('camSeqNum').textContent   = pad(S.seq);
+}
+
+function cycleStatus() {
+  const opts = ['作業前','作業中','作業後'];
+  const idx = opts.indexOf(S.status);
+  S.status = opts[(idx+1) % 3];
+  updateBlackboard();
+  saveState();
+}
+
+function toggleFlash() {
+  flashOn = !flashOn;
+  document.getElementById('flashBtn').textContent = flashOn ? '💡' : '⚡';
+  // トーチ制御（対応端末のみ）
+  if (stream) {
+    const track = stream.getVideoTracks()[0];
+    if (track?.getCapabilities?.()?.torch) {
+      track.applyConstraints({ advanced: [{ torch: flashOn }] }).catch(()=>{});
+    }
+  }
+}
+
+async function flipCamera() {
+  facing = facing === 'environment' ? 'user' : 'environment';
+  if (stream) { stream.getTracks().forEach(t => t.stop()); }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facing },
+      audio: false
+    });
+    document.getElementById('videoEl').srcObject = stream;
+  } catch(e) { showToast('カメラ切替に失敗しました'); }
+}
+
+// ======== CAPTURE ========
+async function capture() {
+  const btn = document.getElementById('shutterBtn');
+  if (btn.classList.contains('saving')) return;
+  btn.classList.add('saving');
+
+  // フラッシュ演出
+  const fl = document.getElementById('flashOverlay');
+  fl.classList.add('flash');
+  setTimeout(() => fl.classList.remove('flash'), 150);
+
+  try {
+    const video = document.getElementById('videoEl');
+    const canvas = document.createElement('canvas');
+    canvas.width  = video.videoWidth  || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext('2d');
+
+    // ビデオフレームを描画
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // 電子黒板を Canvas に重ね描き
+    drawBlackboard(ctx, canvas.width, canvas.height);
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    const fileName = buildFileName();
+
+    lastPhotoDataUrl = dataUrl;
+    lastFileName = fileName;
+
+    // 履歴保存
+    addHistory({
+      fileName,
+      location: S.location,
+      workType: S.workType,
+      status: S.status,
+      seq: S.seq,
+      capturedAt: new Date().toISOString(),
+    });
+
+    // 連番インクリメント
+    S.seq++;
+    saveState();
+
+    // プレビュー画面へ
+    document.getElementById('previewImg').src = dataUrl;
+    document.getElementById('previewFname').textContent = fileName;
+    stopClock();
+    showScreen('previewScreen');
+
+  } catch(e) {
+    showToast('撮影に失敗しました');
+  } finally {
+    btn.classList.remove('saving');
+  }
+}
+
+function drawBlackboard(ctx, cw, ch) {
+  const scale = cw / 390; // iPhone標準幅基準でスケール
+  const bb = document.getElementById('blackboard');
+  const rect = bb.getBoundingClientRect();
+  const vRect = document.getElementById('videoEl').getBoundingClientRect();
+
+  // blackboard の実際の座標をビデオ上の比率から canvas 座標に変換
+  const scaleX = cw / vRect.width;
+  const scaleY = ch / vRect.height;
+  const bx = (rect.left - vRect.left) * scaleX;
+  const by = (rect.top  - vRect.top)  * scaleY;
+  const bw = rect.width  * scaleX;
+  const bh = rect.height * scaleY;
+
+  const pad = 10 * scaleX;
+  const fs  = 11 * scaleX;
+  const lh  = 18 * scaleY;
+
+  ctx.save();
+
+  // 背景
+  ctx.fillStyle = 'rgba(10,30,10,0.87)';
+  roundRect(ctx, bx, by, bw, bh, 8 * scaleX);
+  ctx.fill();
+
+  // 枠線
+  ctx.strokeStyle = '#8B6914';
+  ctx.lineWidth = 2 * scaleX;
+  roundRect(ctx, bx, by, bw, bh, 8 * scaleX);
+  ctx.stroke();
+
+  ctx.font = `700 ${fs}px "Noto Sans JP", sans-serif`;
+  ctx.textBaseline = 'top';
+
+  let y = by + pad;
+
+  // タイトル行
+  ctx.fillStyle = 'white';
+  ctx.fillText('📋 工事写真', bx + pad, y);
+
+  // バッジ
+  const badgeColor = STATUS_COLORS[S.status] || '#666';
+  const badgeText  = S.status;
+  const bmetrics   = ctx.measureText(badgeText);
+  const badgeW     = bmetrics.width + 16 * scaleX;
+  const badgeH     = 16 * scaleY;
+  const badgeX     = bx + bw - pad - badgeW;
+  ctx.fillStyle = badgeColor;
+  roundRect(ctx, badgeX, y, badgeW, badgeH, 8 * scaleX);
+  ctx.fill();
+  ctx.fillStyle = 'white';
+  ctx.font = `700 ${fs * 0.9}px "Noto Sans JP", sans-serif`;
+  ctx.fillText(badgeText, badgeX + 8 * scaleX, y + 2 * scaleY);
+
+  // 区切り線
+  y += lh + 4 * scaleY;
+  ctx.strokeStyle = 'rgba(139,105,20,0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(bx + pad, y); ctx.lineTo(bx + bw - pad, y); ctx.stroke();
+  y += 6 * scaleY;
+
+  ctx.font = `500 ${fs}px "Noto Sans JP", sans-serif`;
+
+  const rows = [];
+  if (S.projectName) rows.push(['工事名', S.projectName]);
+  rows.push(['施工場所', S.location || '—']);
+  rows.push(['工種',     S.workType || '—']);
+  if (S.contractor) rows.push(['施工業者', S.contractor]);
+  rows.push(['撮影日時', formatTime()]);
+
+  rows.forEach(([label, val], i) => {
+    ctx.fillStyle = '#7ec8e3';
+    ctx.fillText(label, bx + pad, y);
+    ctx.fillStyle = i === rows.length - 1 ? '#FFD700' : 'white';
+    ctx.fillText(val, bx + pad + 60 * scaleX, y);
+    y += lh;
+  });
+
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.arcTo(x+w, y, x+w, y+r, r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
+  ctx.lineTo(x+r, y+h);
+  ctx.arcTo(x, y+h, x, y+h-r, r);
+  ctx.lineTo(x, y+r);
+  ctx.arcTo(x, y, x+r, y, r);
+  ctx.closePath();
+}
+
+// ======== PREVIEW ========
+function continueCapture() {
+  showScreen('cameraScreen');
+  updateBlackboard();
+  startClock();
+}
+function goHome() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  stopClock();
+  showScreen('homeScreen');
+  updateHomeUI();
+}
+
+// ======== HISTORY ========
+function showHistory() {
+  const list = document.getElementById('histList');
+  const h = getHistory();
+  if (h.length === 0) {
+    list.innerHTML = '<div class="hist-empty">📷 まだ撮影履歴がありません</div>';
+  } else {
+    list.innerHTML = h.map(item => {
+      const color = STATUS_COLORS[item.status] || '#999';
+      const date  = new Date(item.capturedAt).toLocaleString('ja-JP');
+      return `
+        <div class="hist-item">
+          <div class="hist-dot" style="background:${color}"></div>
+          <div class="hist-info">
+            <div class="hist-fname">${item.fileName}</div>
+            <div class="hist-meta">${item.location} / ${item.workType} — ${date}</div>
+          </div>
+          <div class="hist-badge" style="background:${color}">${item.status}</div>
+        </div>`;
+    }).join('');
+  }
+  showScreen('historyScreen');
+}
+
+function clearHistory() {
+  if (!confirm('撮影履歴をすべて削除しますか？')) return;
+  localStorage.removeItem('kjs_history');
+  showHistory();
+}
+
+// ======== NAVIGATION ========
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ======== INIT ========
+loadState();
+updateHomeUI();
+</script>
+
+</body>
+</html>
