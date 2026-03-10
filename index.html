@@ -291,30 +291,36 @@ background:#000; min-height:0;
 }
 #previewImg{ max-width:100%; max-height:100%; object-fit:contain; }
 .preview-footer{
-background: var(–green-dark);
-border-top:1px solid var(–green-light);
+background: #0f2a0f;
+border-top:2px solid #4aaa4a;
 padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 16px);
 flex-shrink:0;
 }
 .preview-filename{
-background:var(–green-mid); border:1px solid var(–green-light);
+background:#1e5c1e; border:1.5px solid #4aaa4a;
 border-radius:10px; padding:10px 14px; margin-bottom:14px;
 }
-.preview-filename-label{ font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:4px; }
-.preview-filename-val{ font-family:monospace; font-size:12px; color:var(–gold); word-break:break-all; }
-.save-hint{ font-size:11px; color:#4ade80; text-align:center; margin-bottom:12px; }
+.preview-filename-label{ font-size:11px; color:rgba(255,255,255,0.65); margin-bottom:4px; font-weight:700; }
+.preview-filename-val{ font-family:monospace; font-size:13px; color:#FFD700; word-break:break-all; font-weight:700; }
+.save-hint{ font-size:12px; color:#4ade80; text-align:center; margin-bottom:12px; font-weight:700; }
 .preview-btns{ display:flex; gap:10px; }
 .preview-continue{
-flex:1; background:var(–green-board); color:white; border:1px solid var(–green-light);
-border-radius:12px; padding:15px; font-size:15px; font-weight:700;
+flex:1; background:#2d6e2d; color:#ffffff;
+border:2px solid #6abf6a;
+border-radius:12px; padding:18px; font-size:18px; font-weight:800;
 font-family:inherit; cursor:pointer; -webkit-appearance:none;
+text-shadow:0 1px 3px rgba(0,0,0,0.5);
+letter-spacing:0.3px;
 }
+.preview-continue:active{ background:#3a8a3a; }
 .preview-home{
-background:var(–green-mid); color:rgba(255,255,255,0.6);
-border:1px solid var(–green-light);
-border-radius:12px; padding:15px 16px; font-size:13px;
+background:#1e5c1e; color:#ffffff;
+border:2px solid #6abf6a;
+border-radius:12px; padding:18px 20px; font-size:16px; font-weight:800;
 font-family:inherit; cursor:pointer; -webkit-appearance:none;
+text-shadow:0 1px 3px rgba(0,0,0,0.4);
 }
+.preview-home:active{ background:#2d6e2d; }
 
 /* ===== HISTORY ===== */
 #historyScreen{ background:var(–green-dark); color:var(–white); }
