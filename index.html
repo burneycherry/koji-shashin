@@ -235,14 +235,17 @@ line-height:1.5; white-space:pre-wrap;
 text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
-/* 撮影日時行 — ラインなし */
+/* 撮影日時行 — 黒板枠の外・下 */
 .bb-time-row{
 display:flex; align-items:center; justify-content:center;
-padding:3px 8px;
+padding:4px 8px 2px;
 font-size:11px; font-family:monospace; color:#FFD700;
 font-weight:800;
-text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-background: rgba(0,0,0,0.15);
+text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+background: transparent;
+/* 枠と同じ幅に揃える */
+width: 270px;
+box-sizing: border-box;
 }
 
 /* カメラUI */
@@ -464,7 +467,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v21</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v22</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -595,14 +598,14 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
         <div class="bb-status-badge" id="bbBadge">作業前</div>
         <div class="bb-free" id="bbFree"></div>
       </div>
-      <!-- 施工業者 -->
+      <!-- 施工業者（最終行・枠の中） -->
       <div class="bb-row no-bottom">
         <div class="bb-key">施 工 者</div>
         <div class="bb-val-cell" id="bbContractor">—</div>
       </div>
-      <!-- 撮影日時（オフ時は非表示） -->
-      <div class="bb-time-row" id="bbTime">2026/03/10 00:00:00</div>
     </div>
+    <!-- 撮影日時：枠の外・下に表示 -->
+    <div class="bb-time-row" id="bbTime">2026/03/10 00:00:00</div>
   </div>
 
   <div class="cam-topbar">
@@ -693,7 +696,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v21</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v22</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1075,22 +1078,23 @@ async function flipCamera(){
 // ===== 黒板ドラッグ =====
 function initBBPosition(){
   const bb=document.getElementById('blackboard');
-  // 初期位置: 左下
   bb.style.left='12px';
   bb.style.bottom='160px';
   bb.style.top='';
+  // スケールもリセット
+  if(window._bbResetScale) window._bbResetScale();
 }
 
 (function setupBB(){
   const bb = document.getElementById('blackboard');
-  // transform-origin を左上に固定して scale で拡縮
   bb.style.transformOrigin = 'top left';
 
   let dragging = false;
   let startX=0, startY=0, origLeft=0, origTop=0;
 
-  // スケール管理（0.5〜2.0）
   let bbScale = 1.0;
+  // カメラ再起動時にスケールをリセットできるよう外部公開
+  window._bbResetScale = function(){ bbScale=1.0; bb.style.transform='scale(1)'; };
   let pinching = false;
   let startDist = 0, startScale = 1.0;
 
@@ -1262,16 +1266,18 @@ async function capture(){
 }
 
 function drawBBOnCanvas(ctx,cw,ch){
-  const bb=document.getElementById('blackboard');
-  const bbR=bb.getBoundingClientRect();
+  // bb-wrap = 枠あり領域、bb-time-row = 枠外の日時
+  const bbWrap = document.getElementById('blackboard').querySelector('.bb-wrap');
+  const timeEl = document.getElementById('bbTime');
   const vR=document.getElementById('videoWrap').getBoundingClientRect();
+  const wR=bbWrap.getBoundingClientRect();
   const sx=cw/vR.width, sy=ch/vR.height;
-  const bx=(bbR.left-vR.left)*sx, by=(bbR.top-vR.top)*sy;
-  const bw=bbR.width*sx, bh=bbR.height*sy;
+  const bx=(wR.left-vR.left)*sx, by=(wR.top-vR.top)*sy;
+  const bw=wR.width*sx, bh=wR.height*sy;
 
   ctx.save();
 
-  // ★ 背景を完全な不透明緑で塗る（透明バグ修正）
+  // 枠内: 背景緑 + 白枠
   ctx.globalAlpha=1.0;
   ctx.fillStyle='#2d6e2d';
   rrect(ctx,bx,by,bw,bh,4*sx); ctx.fill();
@@ -1343,15 +1349,16 @@ function drawBBOnCanvas(ctx,cw,ch){
   fitText(ctx, S.contractor||'—', bx+kw+p, y+lh/2, bw-kw-p*2);
   y+=lh;
 
-  // 日時（timeMode に応じて描画）
+  // 日時: 枠の外・bb-wrap下端から少し下に描画
   const tl = timeLabel();
-  if(tl){
-    ctx.fillStyle='rgba(0,0,0,0.2)';
-    ctx.fillRect(bx,y,bw,lh*0.9);
+  if(tl && timeEl && timeEl.style.display !== 'none'){
+    const tR = timeEl.getBoundingClientRect();
+    const ty = (tR.top - vR.top) * sy;
+    const th = tR.height * sy;
     ctx.font=`800 ${fs*0.95}px monospace`;
     ctx.fillStyle='#FFD700'; ctx.textAlign='center';
-    ctx.shadowColor='rgba(0,0,0,0.8)'; ctx.shadowBlur=3;
-    ctx.fillText(tl, bx+bw/2, y+lh*0.45);
+    ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=4;
+    ctx.fillText(tl, bx+bw/2, ty + th/2);
     ctx.textAlign='left';
   }
 
