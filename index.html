@@ -195,32 +195,32 @@ box-shadow: 3px 3px 16px rgba(0,0,0,0.75);
 .bb-row{
 display:flex;
 border-bottom:1px solid rgba(255,255,255,0.6);
-min-height:26px;
+min-height:24px;
 }
 .bb-row.no-bottom{ border-bottom:none; }
 
 .bb-key{
 background: rgba(0,0,0,0.2);
 border-right:1px solid rgba(255,255,255,0.6);
-padding:5px 6px;
+padding:4px 6px;
 font-size:11px; font-weight:800; color:#ffffff;
 min-width:62px; max-width:62px; white-space:nowrap;
 display:flex; align-items:center;
 text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 .bb-val-cell{
-flex:1; padding:5px 8px;
+flex:1; padding:4px 8px;
 font-size:11px; color:#ffffff; font-weight:600;
-word-break:break-all; line-height:1.5;
+word-break:break-all; line-height:1.4;
 text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* 中段スペース（ステータス＋フリー）*/
 .bb-mid{
 border-bottom:1px solid rgba(255,255,255,0.6);
-padding:7px 8px;
-min-height:50px;
-display:flex; flex-direction:column; gap:5px;
+padding:6px 8px;
+min-height:32px;
+display:flex; flex-direction:column; gap:4px;
 }
 .bb-status-badge{
 align-self:flex-start;
@@ -238,7 +238,7 @@ text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 /* 撮影日時行 — ラインなし */
 .bb-time-row{
 display:flex; align-items:center; justify-content:center;
-padding:5px 8px;
+padding:3px 8px;
 font-size:11px; font-family:monospace; color:#FFD700;
 font-weight:800;
 text-shadow: 0 1px 3px rgba(0,0,0,0.7);
@@ -388,6 +388,19 @@ font-size:12px; color:rgba(255,255,255,0.5);
 padding:10px 16px 6px; font-weight:700;
 }
 
+/* ===== RESOLUTION MODE ===== */
+.res-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:0; }
+.res-btn{
+background:#0f2a0f; border:2px solid rgba(255,255,255,0.2);
+border-radius:10px; padding:10px 4px; font-size:12px; font-weight:700;
+font-family:inherit; color:rgba(255,255,255,0.45); cursor:pointer;
+text-align:center; line-height:1.3; -webkit-appearance:none;
+}
+.res-btn.res-active{
+border-color:#4ade80; background:rgba(22,163,74,0.25); color:#4ade80;
+}
+.res-btn .res-sub{ display:block; font-size:9px; font-weight:400; opacity:0.75; margin-top:3px; }
+
 /* ===== TIME MODE ===== */
 .time-mode-btn{
 background:#0f2a0f; border:2px solid rgba(255,255,255,0.2);
@@ -451,7 +464,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v15</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v21</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -495,6 +508,28 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
   </div>
 </div>
 
+
+<div class="card">
+  <div class="card-title">📐 撮影解像度</div>
+  <div class="res-grid">
+    <button class="res-btn res-active" id="resBtn_cals1" onclick="setResMode('cals1')">
+      推奨サイズ
+      <span class="res-sub">1280×960</span>
+      <span class="res-sub">約123万画素</span>
+    </button>
+    <button class="res-btn" id="resBtn_cals2" onclick="setResMode('cals2')">
+      高精細サイズ
+      <span class="res-sub">2000×1500</span>
+      <span class="res-sub">300万画素</span>
+    </button>
+    <button class="res-btn" id="resBtn_full" onclick="setResMode('full')">
+      フル画素
+      <span class="res-sub">デバイス最大</span>
+      <span class="res-sub">制限なし</span>
+    </button>
+  </div>
+  <div id="resModeHint" style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.5);padding:6px 8px;background:#0f2a0f;border-radius:8px;line-height:1.6;"></div>
+</div>
 
 <div class="card">
   <div class="card-title">撮影日時の表示</div>
@@ -658,7 +693,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v15</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v21</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -736,6 +771,68 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     ・削除前に確認ポップアップが表示されます
   </div>
 </div>
+
+<!-- 撮影解像度 -->
+<div class="rm-card" style="border-color:#4ade80;">
+  <div class="rm-head" style="color:#4ade80;">📐 撮影解像度について</div>
+
+  <!-- なぜ解像度が重要か -->
+  <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;margin-bottom:14px;">
+    公共工事のデジタル写真は、国土交通省「デジタル写真管理情報基準」により<strong style="color:white;">100万〜300万画素程度</strong>が標準とされています。<br>
+    高画素すぎると電子納品時に以下の問題が起きます。
+  </div>
+  <div style="background:rgba(248,113,113,0.12);border:1px solid #f87171;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+    <div style="font-size:12px;color:#fca5a5;line-height:1.9;">
+      ⚠️ <strong style="color:white;">ファイル容量の肥大化</strong>：サーバーを圧迫し転送・バックアップに時間がかかる<br>
+      ⚠️ <strong style="color:white;">閲覧ソフトの動作遅延</strong>：高解像度すぎると表示が重くなり検査効率が低下<br>
+      ⚠️ <strong style="color:white;">リサイズ禁止</strong>：撮影後の加工は「改ざん」とみなされるリスクがある
+    </div>
+  </div>
+
+  <!-- 3モードの説明 -->
+  <div class="rm-head" style="font-size:13px;border-bottom:none;padding-bottom:4px;margin-bottom:8px;">選べる3つのモード</div>
+
+  <div style="background:rgba(22,163,74,0.15);border:1.5px solid #4ade80;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+    <div style="font-size:14px;font-weight:800;color:#4ade80;margin-bottom:6px;">🟢 推奨サイズ（公共工事向け標準）</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;">
+      ・解像度：<strong style="color:white;">1,280 × 960 px（約123万画素）</strong><br>
+      ・アスペクト比：4:3（国土交通省基準準拠）<br>
+      ・国土交通省デジタル写真管理情報基準の目安に沿ったサイズ設定<br>
+      ・ファイルサイズが小さく、検査・共有が快適
+    </div>
+  </div>
+
+  <div style="background:rgba(96,165,250,0.12);border:1.5px solid #60a5fa;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+    <div style="font-size:14px;font-weight:800;color:#93c5fd;margin-bottom:6px;">🔵 高精細サイズ</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;">
+      ・解像度：<strong style="color:white;">2,000 × 1,500 px（300万画素）</strong><br>
+      ・アスペクト比：4:3<br>
+      ・黒板の文字が細かい場合や、細部の鮮明さが求められる現場に<br>
+      ・基準の目安上限にあたるサイズ（300万画素）
+    </div>
+  </div>
+
+  <div style="background:rgba(251,191,36,0.1);border:1.5px solid #fbbf24;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+    <div style="font-size:14px;font-weight:800;color:#fde68a;margin-bottom:6px;">🟡 フル画素</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;">
+      ・解像度：<strong style="color:white;">デバイスの最大解像度（制限なし）</strong><br>
+      ・iPhone・iPadのカメラ本来の画質そのまま<br>
+      ・社内管理や施主への報告用など、電子納品しない場合に
+    </div>
+    <div style="margin-top:8px;padding:6px 10px;background:rgba(251,191,36,0.15);border-radius:6px;font-size:11px;color:#fde68a;">
+      ⚠️ 公共工事の電子納品には原則使用しないこと
+    </div>
+  </div>
+
+  <!-- 運用のポイント -->
+  <div class="rm-head" style="font-size:13px;border-bottom:none;padding-bottom:4px;margin-bottom:8px;">💡 運用上のポイント</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.9;">
+    ・<strong style="color:white;">着工前に発注者の写真管理基準を必ず確認</strong>すること<br>　　※本アプリはCALS/EC規格の正式認定品ではありません<br>
+    ・自治体・工種（営繕・農林水産省等）により独自基準がある場合あり<br>
+    ・画素数より「<strong style="color:white;">黒板の文字がはっきり読めること</strong>」が最重要<br>
+    ・ピンボケ・光の反射・影に注意して撮影すること
+  </div>
+</div>
 ```
 
   </div>
@@ -747,6 +844,7 @@ const S = {
   projectName:'', location:'', workType:'', contractor:'',
   status:'作業前', freeStatusText:'', seq:1,
   timeMode: 'datetime',  // 'datetime' | 'date' | 'off'
+  resMode: 'cals1',      // 'cals1'(1280x960) | 'cals2'(2048x1536) | 'full'
   bbX:12, bbY:-1,
 };
 const SC = { '作業前':'#2563eb', '作業中':'#ea580c', '作業後':'#16a34a', 'フリー':'#b45309' };
@@ -804,8 +902,27 @@ function refreshHome(){
   document.getElementById('workType').value    = S.workType||'';
   document.getElementById('contractor').value  = S.contractor||'';
   document.getElementById('seqDisplay').textContent = pad(S.seq);
-  refreshHint(); refreshStatusBtns(); refreshTimeMode();
+  refreshHint(); refreshStatusBtns(); refreshTimeMode(); refreshResMode();
 }
+// ===== RESOLUTION MODE =====
+const RES_CONFIG = {
+  cals1: { w:1280, h:960,  label:'推奨サイズ 1280×960（約123万画素）' },
+  cals2: { w:2000, h:1500, label:'高精細サイズ 2000×1500（300万画素）' },
+  full:  { w:null, h:null,  label:'フル画素（デバイス最大解像度）' },
+};
+function setResMode(mode){
+  S.resMode = mode; refreshResMode(); save();
+}
+function refreshResMode(){
+  const m = S.resMode || 'cals1';
+  ['cals1','cals2','full'].forEach(k=>{
+    const b=document.getElementById('resBtn_'+k);
+    if(b) b.classList.toggle('res-active', m===k);
+  });
+  const hint = document.getElementById('resModeHint');
+  if(hint) hint.textContent = '✅ ' + RES_CONFIG[m].label;
+}
+
 function setTimeMode(mode){
   S.timeMode = mode;
   refreshTimeMode(); save();
@@ -881,9 +998,12 @@ async function startCamera(){
   save();
   showScreen('cameraScreen');
   try{
-    stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ideal:facing}, width:{ideal:1920}, height:{ideal:1080} }, audio:false
-    });
+    // 解像度: resModeに応じたideal値でカメラ起動
+    const _rc = RES_CONFIG[S.resMode||'cals1'];
+    const _vidConstraint = _rc.w
+      ? { facingMode:{ideal:facing}, width:{ideal:_rc.w}, height:{ideal:_rc.h} }
+      : { facingMode:{ideal:facing} };
+    stream = await navigator.mediaDevices.getUserMedia({ video:_vidConstraint, audio:false });
     const vid=document.getElementById('videoEl');
     vid.srcObject=stream;
     vid.onloadedmetadata=()=>vid.play().catch(()=>{});
@@ -1079,14 +1199,50 @@ async function capture(){
 
   try{
     const vid=document.getElementById('videoEl');
-    const w=vid.videoWidth||1280, h=vid.videoHeight||720;
+    const vw=vid.videoWidth||1280, vh=vid.videoHeight||720;
     const canvas=document.createElement('canvas');
+
+    // ===== 回転判定: 画面とビデオのアスペクト比を比較 =====
+    // 画面が縦(portrait)なのにビデオが横(landscape)なら90°回転が必要
+    // iPad/iPhoneどちらでも動作するよう ratio で判定
+    const screenRatio = window.innerWidth / window.innerHeight;  // <1 = 縦持ち
+    const videoRatio  = vw / vh;                                  // <1 = 縦データ
+    // 片方だけ縦比率なら向き不一致 → 回転必要
+    const needRotate = (screenRatio < 1) !== (videoRatio < 1);
+
+    let w, h;
+    if(needRotate){ w=vh; h=vw; }   // 90°回転後のサイズ
+    else          { w=vw; h=vh; }
+
     canvas.width=w; canvas.height=h;
     const ctx=canvas.getContext('2d');
-    ctx.drawImage(vid,0,0,w,h);
-    drawBBOnCanvas(ctx,w,h);
 
-    const dataUrl=canvas.toDataURL('image/jpeg',0.92);
+    if(needRotate){
+      // canvas中心を軸に+90°回転して描画（縦持ち時の横動画を正立させる）
+      ctx.translate(w/2, h/2);
+      ctx.rotate(Math.PI/2);
+      ctx.drawImage(vid, -vw/2, -vh/2, vw, vh);
+      ctx.resetTransform();
+    } else {
+      ctx.drawImage(vid, 0, 0, w, h);
+    }
+    // CALS系: 目標サイズにリサイズ（縦横比は保持・中央クロップ不要）
+    const _rcOut = RES_CONFIG[S.resMode||'cals1'];
+    let finalCanvas = canvas;
+    if(_rcOut.w){
+      // canvasの長辺・短辺を目標に合わせてリサイズ
+      const targetW = w >= h ? _rcOut.w : _rcOut.h; // 横向きなら幅、縦なら逆
+      const targetH = w >= h ? _rcOut.h : _rcOut.w;
+      if(w !== targetW || h !== targetH){
+        finalCanvas = document.createElement('canvas');
+        finalCanvas.width  = targetW;
+        finalCanvas.height = targetH;
+        finalCanvas.getContext('2d').drawImage(canvas, 0, 0, targetW, targetH);
+      }
+    }
+    drawBBOnCanvas(finalCanvas.getContext('2d'), finalCanvas.width, finalCanvas.height);
+
+    const dataUrl=finalCanvas.toDataURL('image/jpeg',0.92);
     const fname=buildFname();
 
     addHist({ fileName:fname, location:S.location, workType:S.workType, status:S.status, seq:S.seq, capturedAt:new Date().toISOString() });
@@ -1155,7 +1311,7 @@ function drawBBOnCanvas(ctx,cw,ch){
   });
 
   // 中段
-  const midH=Math.max(54,56*sy);
+  const midH=Math.max(36,38*sy);
   ctx.shadowBlur=0;
   ctx.strokeStyle='rgba(255,255,255,0.65)'; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(bx,y+midH); ctx.lineTo(bx+bw,y+midH); ctx.stroke();
