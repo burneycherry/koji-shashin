@@ -336,21 +336,42 @@ background:white; border:2px solid #ccc;
 }
 .shutter.saving{ opacity:0.5; }
 
+#camLandscapeTop{ display:none; }
+@media (orientation: landscape){
+#camLandscapeTop{ display:flex; }
+/* 縦持ちのflashBtnは非表示（サイドバー内のもの使う） */
+}
+/* 縦持ち時のflashBtnは cam-topbar 右側に表示 */
+@media (orientation: portrait){
+#camBottombar #flashBtn{ display:none; }
+.cam-topbar > div[style*=“width:40px”]{ display:none; }
+}
 /* ===== 横持ち時: ボタンを右側縦並びに =====  */
 @media (orientation: landscape){
 .cam-bottombar{
-/* 右端縦並び */
-left:auto; right:0; top:0; bottom:0; width:110px;
+left:auto; right:0; top:0; bottom:0; width:120px;
 flex-direction:column;
-justify-content:center;
+justify-content:space-between;
 padding:16px 8px;
+padding-top:calc(env(safe-area-inset-top,0px) + 12px);
+padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px);
 padding-right:calc(env(safe-area-inset-right,0px) + 8px);
-background:linear-gradient(to left,rgba(0,0,0,0.8),transparent);
+background:linear-gradient(to left,rgba(0,0,0,0.85),transparent);
 }
-/* トップバーを右に寄せない（左上固定のまま） */
+/* 上部一塊: フラッシュ+日時 */
+#camLandscapeTop{
+display:flex; flex-direction:column; align-items:center; gap:8px;
+}
+/* 日時トグルを右サイドバー内に移動 */
 #camTimeToggle{
-top:calc(env(safe-area-inset-top,0px) + 8px) !important;
-right:120px !important;
+position:static !important;
+background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.3);border-radius:14px;
+color:white;font-size:11px;font-weight:700;font-family:inherit;padding:5px 10px;cursor:pointer;
+}
+/* フラッシュボタンをサイドバーに */
+#flashBtn{
+position:static;
+width:44px;height:44px;border-radius:22px;
 }
 }
 /* ===== PREVIEW ===== */
@@ -529,7 +550,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v53</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v54</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -557,15 +578,40 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 </div>
 
 <div class="card">
-  <div class="card-title">作業ステータス（4択）</div>
+  <div class="card-title">作業ステータス</div>
   <div class="status-grid4">
-    <button class="status-opt sel-mae" data-val="作業前" onclick="selectStatus(this)">作業前</button>
-    <button class="status-opt" data-val="作業中" onclick="selectStatus(this)">作業中</button>
-    <button class="status-opt" data-val="作業後" onclick="selectStatus(this)">作業後</button>
-    <button class="status-opt" data-val="フリー" onclick="selectStatus(this)">フリー</button>
+    <button class="status-opt sel-mae" data-val="作業前" onclick="selectStatus(this)" id="statusBtn_mae">作業前</button>
+    <button class="status-opt" data-val="作業中" onclick="selectStatus(this)" id="statusBtn_chu">作業中</button>
+    <button class="status-opt" data-val="作業後" onclick="selectStatus(this)" id="statusBtn_ato">作業後</button>
+    <button class="status-opt" data-val="フリー" onclick="selectStatus(this)" id="statusBtn_free">フリー</button>
+  </div>
+  <!-- カスタムラベル入力 -->
+  <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;" id="customLabelWrap">
+    <div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px;">作業前のラベル</div>
+      <input type="text" id="labelMae" placeholder="作業前"
+        style="width:100%;background:#0f2a0f;border:1px solid rgba(255,255,255,0.2);border-radius:8px;
+               padding:7px 10px;font-size:13px;font-family:inherit;color:#fff;outline:none;box-sizing:border-box;"
+        oninput="onCustomLabelInput('mae', this.value)">
+    </div>
+    <div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px;">作業中のラベル</div>
+      <input type="text" id="labelChu" placeholder="作業中"
+        style="width:100%;background:#0f2a0f;border:1px solid rgba(255,255,255,0.2);border-radius:8px;
+               padding:7px 10px;font-size:13px;font-family:inherit;color:#fff;outline:none;box-sizing:border-box;"
+        oninput="onCustomLabelInput('chu', this.value)">
+    </div>
+    <div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px;">作業後のラベル</div>
+      <input type="text" id="labelAto" placeholder="作業後"
+        style="width:100%;background:#0f2a0f;border:1px solid rgba(255,255,255,0.2);border-radius:8px;
+               padding:7px 10px;font-size:13px;font-family:inherit;color:#fff;outline:none;box-sizing:border-box;"
+        oninput="onCustomLabelInput('ato', this.value)">
+    </div>
   </div>
   <div id="freeStatusWrap" style="display:none;margin-top:10px;">
-    <textarea id="freeStatusInput" placeholder="例：絶縁測定&#10;試運転など（複数行OK）" rows="5"
+    <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:3px;">フリーのラベル（複数行OK）</div>
+    <textarea id="freeStatusInput" placeholder="例：絶縁測定&#10;試運転など" rows="3"
       style="width:100%;background:#0f2a0f;border:2px solid #FFD700;border-radius:10px;
              padding:11px 14px;font-size:15px;font-family:inherit;color:#FFD700;
              outline:none;-webkit-appearance:none;resize:none;box-sizing:border-box;
@@ -677,29 +723,38 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
       <div class="cam-seq-num" id="camSeqNum">001</div>
       <div class="cam-seq-label">連番</div>
     </div>
-    <button class="cam-flash" id="flashBtn" onclick="toggleFlash()">⚡</button>
+    <div style="width:40px;"></div><!-- flash moved to sidebar -->
   </div>
 
-  <div class="cam-bottombar">
+  <div class="cam-bottombar" id="camBottombar">
+    <!-- 上部一塊: 横持ちでフラッシュ＋日時 -->
+    <div id="camLandscapeTop">
+      <button id="flashBtn" onclick="toggleFlash()"
+        style="position:static;width:44px;height:44px;border-radius:22px;
+               background:rgba(0,0,0,0.55);border:none;color:white;font-size:22px;cursor:pointer;
+               display:flex;align-items:center;justify-content:center;">⚡</button>
+      <button id="camTimeToggle" onclick="cycleTimeMode()"
+        style="position:fixed;top:calc(env(safe-area-inset-top,44px) + 56px);right:10px;z-index:31;
+               background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.3);border-radius:14px;
+               color:white;font-size:11px;font-weight:700;font-family:inherit;padding:5px 10px;cursor:pointer;">
+        🕐 日時
+      </button>
+    </div>
+    <!-- 反転 -->
     <button class="cam-side-btn" onclick="flipCamera()">
       <span>🔄</span>
       <span class="cam-side-label">反転</span>
     </button>
+    <!-- 撮影 -->
     <div class="shutter" id="shutterBtn" onclick="capture()">
       <div class="shutter-inner"></div>
     </div>
+    <!-- 作業ステータス -->
     <button class="cam-side-btn" onclick="cycleStatus()">
       <span>📝</span>
       <span class="cam-side-label" id="statusLabel">作業前</span>
     </button>
   </div>
-  <!-- 撮影日時トグル（カメラ画面内）→ タップで3択ループ -->
-  <button id="camTimeToggle" onclick="cycleTimeMode()"
-    style="position:fixed;top:calc(env(safe-area-inset-top,44px) + 56px);right:10px;z-index:31;
-           background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.3);border-radius:14px;
-           color:white;font-size:11px;font-weight:700;font-family:inherit;padding:5px 10px;cursor:pointer;">
-    🕐 日時
-  </button>
 </div>
 
 <!-- ===== PREVIEW ===== -->
@@ -759,7 +814,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v53</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v54</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -908,7 +963,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 // ===== STATE =====
 const S = {
   projectName:'', location:'', workType:'', contractor:'',
-  status:'作業前', freeStatusText:'', seq:1,
+  status:'作業前', freeStatusText:'', customLabel:{mae:'',chu:'',ato:''}, seq:1,
   timeMode: 'datetime',  // 'datetime' | 'date' | 'off'
   resMode: 'cals1',      // 'cals1'(1280x960) | 'cals2'(2048x1536) | 'full'
   bbX:12, bbY:-1,
@@ -1031,10 +1086,36 @@ function refreshStatusBtns(){
   if(wrap) wrap.style.display = S.status==='フリー' ? 'block' : 'none';
   const inp=document.getElementById('freeStatusInput');
   if(inp && S.status==='フリー') inp.value=S.freeStatusText||'';
+  // カスタムラベルを入力欄に復元
+  if(S.customLabel){
+    const lm=document.getElementById('labelMae'); if(lm) lm.value=S.customLabel.mae||'';
+    const lc=document.getElementById('labelChu'); if(lc) lc.value=S.customLabel.chu||'';
+    const la=document.getElementById('labelAto'); if(la) la.value=S.customLabel.ato||'';
+    // ボタンラベルも更新
+    const bm=document.getElementById('statusBtn_mae'); if(bm&&S.customLabel.mae) bm.textContent=S.customLabel.mae;
+    const bc=document.getElementById('statusBtn_chu'); if(bc&&S.customLabel.chu) bc.textContent=S.customLabel.chu;
+    const ba=document.getElementById('statusBtn_ato'); if(ba&&S.customLabel.ato) ba.textContent=S.customLabel.ato;
+  }
 }
 function selectStatus(el){
   S.status=el.dataset.val;
   refreshStatusBtns(); refreshHint(); save();
+}
+function onCustomLabelInput(key, val){
+  S.customLabel[key] = val;
+  // ボタンのラベルも更新
+  const defaults = {mae:'作業前', chu:'作業中', ato:'作業後'};
+  const btnId = {mae:'statusBtn_mae', chu:'statusBtn_chu', ato:'statusBtn_ato'};
+  document.getElementById(btnId[key]).textContent = val || defaults[key];
+  refreshBlackboard(); refreshHint(); save();
+}
+function getStatusLabel(status){
+  // status に対応する実際のラベル文字列を返す
+  if(status==='作業前') return S.customLabel.mae || '作業前';
+  if(status==='作業中') return S.customLabel.chu || '作業中';
+  if(status==='作業後') return S.customLabel.ato || '作業後';
+  if(status==='フリー') return S.freeStatusText || '';
+  return status;
 }
 function onFreeStatusInput(val){
   S.freeStatusText=val; save();
@@ -1099,7 +1180,7 @@ function refreshBlackboard(){
   // バッジは常にチョーク白・フリーはフリーワード表示
   if(S.status==='フリー'){
     const _ft = S.freeStatusText || 'フリーワード';
-    badge.textContent = _ft;
+    badge.textContent = getStatusLabel(S.status);
     badge.style.whiteSpace = 'pre-wrap';
     // 行数に応じてフォントサイズ自動調整（bb-midの高さ基準）
     const _midEl = badge.closest('.bb-mid') || badge.parentElement;
@@ -1109,7 +1190,7 @@ function refreshBlackboard(){
     badge.style.fontSize = _fs + 'px';
     badge.style.lineHeight = '1.35';
   } else {
-    badge.textContent = S.status;
+    badge.textContent = getStatusLabel(S.status);
     badge.style.fontSize = '16.5px';
     badge.style.lineHeight = '';
     badge.style.whiteSpace = '';
@@ -1123,14 +1204,24 @@ function refreshBlackboard(){
   document.getElementById('bbWorkType').textContent  = S.workType||'—';
   document.getElementById('bbContractor').textContent= S.contractor||'—';
   document.getElementById('bbFree').textContent      = '';  // フリーステータスのテキストはバッジで表示
-  document.getElementById('statusLabel').textContent = S.status==='フリー' ? (S.freeStatusText||'フリーワード').split('\n')[0].slice(0,8) : S.status;
+  document.getElementById('statusLabel').textContent = getStatusLabel(S.status).split('\n')[0].slice(0,8) || S.status;
   document.getElementById('camSeqNum').textContent   = pad(S.seq);
   refreshTimeMode();
 }
 
 function cycleStatus(){
-  const opts=['作業前','作業中','作業後','フリー'];
-  S.status=opts[(opts.indexOf(S.status)+1)%4];
+  // 空ラベルの選択肢をスキップ
+  const allOpts=['作業前','作業中','作業後','フリー'];
+  const activeOpts = allOpts.filter(o=>{
+    if(o==='作業前') return true; // 必ず存在
+    if(o==='作業中') return true;
+    if(o==='作業後') return true;
+    if(o==='フリー') return S.freeStatusText.trim() !== ''; // 空なら除外
+    return true;
+  });
+  if(activeOpts.length===0) return;
+  const idx = activeOpts.indexOf(S.status);
+  S.status = activeOpts[(idx+1) % activeOpts.length];
   refreshBlackboard(); save();
 }
 function toggleFlash(){
@@ -1537,7 +1628,7 @@ function drawBBOnCanvas(ctx, cw, ch, guide){
   ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1*sx;
   ctx.beginPath(); ctx.moveTo(mc.x, mc.y+mc.h); ctx.lineTo(mc.x+mc.w, mc.y+mc.h); ctx.stroke();
 
-  const badgeTxt = S.status==='フリー' ? (S.freeStatusText||'フリーワード') : S.status;
+  const badgeTxt = getStatusLabel(S.status) || S.status;
   const lines = badgeTxt.split('\n').filter(l => l.trim() !== '');
   // 行数に応じてフォントサイズ自動縮小（エリア高さに収まるよう）
   const maxFsForLines = Math.min(fs*1.38, (mc.h * 0.62) / lines.length);
