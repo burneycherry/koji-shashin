@@ -475,7 +475,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v30</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v31</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -704,7 +704,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v30</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v31</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1284,28 +1284,35 @@ function drawBBOnCanvas(ctx, cw, ch){
   // ===== 画面座標 = canvas座標 方式 =====
   // capture()でcanvasを画面と同じcover方式で描いているため
   // DOM要素の画面座標がそのままcanvas座標に対応する。
-  // あとは canvas/画面 の比率でスケールするだけ。
 
   const SW = window.innerWidth;
   const SH = window.innerHeight;
-  const sx = cw / SW;  // canvasx / 画面幅
-  const sy = ch / SH;  // canvasy / 画面高さ
+  const sx = cw / SW;
+  const sy = ch / SH;
 
   function toC(r){
     return { x: r.left*sx, y: r.top*sy, w: r.width*sx, h: r.height*sy };
   }
 
-  const bbWrap  = document.getElementById('blackboard').querySelector('.bb-wrap');
+  const bb      = document.getElementById('blackboard');
+  const bbWrap  = bb.querySelector('.bb-wrap');
   const timeEl  = document.getElementById('bbTime');
   const midEl   = bbWrap.querySelector('.bb-mid');
   const dataRowEls = bbWrap.querySelectorAll('.bb-row:not(.no-bottom)');
   const ctorRowEl  = bbWrap.querySelector('.bb-row.no-bottom');
 
   const wc = toC(bbWrap.getBoundingClientRect());
-  // フォントサイズ = 黒板幅の約5%（Canvas座標系）
-  const fs = Math.max(10, wc.w * 0.055);
-  // キー幅の割合（CSS 54px / 220px ≈ 24.5%）
-  const KW_RATIO = 54 / 220;
+
+  // ── フォントサイズ: bb-key要素のcomputedStyleを実スケールで取得 ──
+  // getComputedStyle はCSS transform前のpx値を返す
+  // getBoundingClientRect は transform後の視覚サイズを返す
+  // → 視覚フォントサイズ = CSS font-size × (視覚幅 / CSS幅)
+  const firstKeyEl = bbWrap.querySelector('.bb-key');
+  const cssFs   = parseFloat(getComputedStyle(firstKeyEl).fontSize) || 10;
+  const cssElW  = parseFloat(getComputedStyle(firstKeyEl).width)    || 54;
+  const visElW  = firstKeyEl.getBoundingClientRect().width;
+  const scaleRatio = visElW / cssElW;  // CSS transform:scale の実際の倍率
+  const fs = cssFs * scaleRatio * sx;  // canvas上のフォントサイズ
 
   ctx.save();
   ctx.globalAlpha = 1.0;
@@ -1324,9 +1331,12 @@ function drawBBOnCanvas(ctx, cw, ch){
   const dataVals   = [S.projectName||'—', S.location||'—', S.workType||'—'];
 
   dataRowEls.forEach((rowEl, i)=>{
-    const rc = toC(rowEl.getBoundingClientRect());
-    const kw = rc.w * KW_RATIO;
-    const p  = rc.w * 0.025;
+    const rc  = toC(rowEl.getBoundingClientRect());
+    // bb-key の実際の幅を直接測定（比率計算ではなく実測）
+    const keyEl = rowEl.querySelector('.bb-key');
+    const kc  = keyEl ? toC(keyEl.getBoundingClientRect()) : null;
+    const kw  = kc ? kc.w : rc.w * 0.29;
+    const p   = Math.max(3, kw * 0.07);
 
     // キー背景
     ctx.fillStyle = 'rgba(0,0,0,0.22)';
@@ -1351,7 +1361,7 @@ function drawBBOnCanvas(ctx, cw, ch){
     ctx.beginPath(); ctx.rect(rc.x+kw, rc.y, rc.w-kw, rc.h); ctx.clip();
     ctx.font = `600 ${fs}px -apple-system,sans-serif`;
     ctx.fillStyle = '#ffffff';
-    fitText(ctx, dataVals[i], rc.x+kw+p, rc.y+rc.h/2, rc.w-kw-p*2);
+    fitText(ctx, dataVals[i], rc.x+kw+p*1.5, rc.y+rc.h/2, rc.w-kw-p*3);
     ctx.restore();
   });
 
@@ -1366,7 +1376,7 @@ function drawBBOnCanvas(ctx, cw, ch){
   const bm  = ctx.measureText(badgeTxt);
   const bdgW = bm.width + 18*sx;
   const bdgH = mc.h * 0.52;
-  const bdgX = mc.x + (mc.w - bdgW) / 2;   // 中央
+  const bdgX = mc.x + (mc.w - bdgW) / 2;
   const bdgY = mc.y + (mc.h - bdgH) / 2;
   ctx.shadowBlur = 0;
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
@@ -1379,9 +1389,11 @@ function drawBBOnCanvas(ctx, cw, ch){
 
   // ── 施工者行 ──
   if(ctorRowEl){
-    const rc = toC(ctorRowEl.getBoundingClientRect());
-    const kw = rc.w * KW_RATIO;
-    const p  = rc.w * 0.025;
+    const rc  = toC(ctorRowEl.getBoundingClientRect());
+    const keyEl = ctorRowEl.querySelector('.bb-key');
+    const kc  = keyEl ? toC(keyEl.getBoundingClientRect()) : null;
+    const kw  = kc ? kc.w : rc.w * 0.29;
+    const p   = Math.max(3, kw * 0.07);
 
     ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.fillRect(rc.x, rc.y, kw, rc.h);
@@ -1399,7 +1411,7 @@ function drawBBOnCanvas(ctx, cw, ch){
     ctx.beginPath(); ctx.rect(rc.x+kw, rc.y, rc.w-kw, rc.h); ctx.clip();
     ctx.font = `600 ${fs}px -apple-system,sans-serif`;
     ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle';
-    fitText(ctx, S.contractor||'—', rc.x+kw+p, rc.y+rc.h/2, rc.w-kw-p*2);
+    fitText(ctx, S.contractor||'—', rc.x+kw+p*1.5, rc.y+rc.h/2, rc.w-kw-p*3);
     ctx.restore();
   }
 
