@@ -475,7 +475,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v28</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v29</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -704,7 +704,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v28</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v29</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1274,28 +1274,73 @@ async function capture(){
 }
 
 function drawBBOnCanvas(ctx, cw, ch){
-  // ===== 座標変換: videoEl自体のBoundingClientRectを基準にする =====
-  // video要素は translate(-50%,-50%) でセンタリングされており、
-  // getBoundingClientRect() はこのtransformを含む実際の視覚的位置を返す。
-  // drawImage(vid, 0, 0, cw, ch) はビデオフレーム全体をcanvasに描くので、
-  // 「videoEl表示左上 → canvas左上」「videoEl表示右下 → canvas右下」
-  // という1:1の対応になる。これを使って DOM要素位置をcanvas座標に変換する。
+  // ===== object-fit:cover を考慮した正確な座標変換 =====
+  //
+  // drawImage(vid, 0,0,cw,ch) はビデオの生フレーム全体を canvas に描く。
+  // 一方 video要素は object-fit:cover で表示されるため、
+  // 「画面に見えている領域」= 生フレームの中央をクロップした部分。
+  //
+  // 正しい変換:
+  //   canvas pixel (cx,cy) = 生フレームの (cx,cy)
+  //   画面上の (sx,sy) → 生フレームの (fx,fy) を求める
+  //
+  //   object-fit:cover のスケール計算:
+  //     dispW = vidR.width, dispH = vidR.height（video要素の画面上の表示サイズ）
+  //     vw, vh = 生フレームのピクセルサイズ
+  //     scale = max(dispW/vw, dispH/vh)  ← coverはより大きい方のスケール
+  //     renderedW = vw * scale, renderedH = vh * scale
+  //     cropOffsetX = (renderedW - dispW) / 2  ← 左にクロップされる量（表示px）
+  //     cropOffsetY = (renderedH - dispH) / 2
+  //
+  //   スクリーン座標→フレーム座標:
+  //     fx = (sx - vidR.left + cropOffsetX) / scale
+  //     fy = (sy - vidR.top  + cropOffsetY) / scale
+  //
+  //   さらに canvas は cw=w, ch=h でリサイズされている場合があるので
+  //   最終変換係数 = cw/vw (= ch/vh)
 
-  const vid   = document.getElementById('videoEl');
-  const vidR  = vid.getBoundingClientRect(); // videoEl の実際の画面上の rect
+  const vid  = document.getElementById('videoEl');
+  const vidR = vid.getBoundingClientRect();
 
-  // canvas座標変換係数（vidR上のpxをcanvas pxへ）
-  const sx = cw / vidR.width;
-  const sy = ch / vidR.height;
+  // 生フレームサイズ（回転前）
+  const vw = vid.videoWidth  || 1280;
+  const vh = vid.videoHeight || 720;
 
-  // 画面座標→Canvas座標の変換ヘルパー
+  // object-fit:cover スケール
+  const scaleX = vidR.width  / vw;
+  const scaleY = vidR.height / vh;
+  const scale  = Math.max(scaleX, scaleY);  // cover = 大きい方
+
+  // クロップオフセット（表示px単位）
+  const cropX = (vw * scale - vidR.width)  / 2;
+  const cropY = (vh * scale - vidR.height) / 2;
+
+  // canvas変換係数（生フレームpx → canvas px）
+  // needRotate時は w=vh,h=vw だが drawBBOnCanvas は常に回転後のcanvasを受け取る
+  // → cw/vw は回転なし時、needRotate時は cw/vh になる
+  // 呼び出し元からcw,chを受け取っているので、それに合わせる
+  const fcx = cw / (cw >= ch ? vw : vh);  // frame→canvas x係数
+  const fcy = ch / (cw >= ch ? vh : vw);  // frame→canvas y係数
+
+  // 画面座標 → canvas座標の変換
   function toC(r){
-    return {
-      x: (r.left - vidR.left) * sx,
-      y: (r.top  - vidR.top)  * sy,
-      w: r.width  * sx,
-      h: r.height * sy
-    };
+    // 各コーナーの画面座標をフレーム座標に変換
+    const fx = (r.left - vidR.left + cropX) / scale;
+    const fy = (r.top  - vidR.top  + cropY) / scale;
+    const fw = r.width  / scale;
+    const fh = r.height / scale;
+    // needRotate時: フレーム(fx,fy)→canvas座標は90°回転されている
+    if(cw < ch){
+      // 縦canvas (needRotate): canvas(cx,cy) = (vh-fy-fh, fx) * 係数... 複雑
+      // 代わりに: canvasに回転描画済みなので x→y, y→(cw-x)
+      return {
+        x: fy  * fcy,
+        y: (vw - fx - fw) * fcx,
+        w: fh  * fcy,
+        h: fw  * fcx
+      };
+    }
+    return { x: fx*fcx, y: fy*fcy, w: fw*fcx, h: fh*fcy };
   }
 
   const bbWrap  = document.getElementById('blackboard').querySelector('.bb-wrap');
