@@ -1,5 +1,1554 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="工事写真帳">
+<title>工事写真帳</title>
+<style>
+:root {
+  --green-dark:  #1a3a1a;
+  --green-mid:   #1e5c1e;
+  --green-board: #2d6e2d;
+  --green-light: #3a8a3a;
+  --green-pale:  #c8e6c8;
+  --board-line:  rgba(255,255,255,0.7);
+  --gold:        #d4a843;
+  --white:       #ffffff;
+  --gray200:     #e2e8f0;
+  --gray400:     #94a3b8;
+  --gray600:     #475569;
+  --text-dark:   #0f172a;
+  --radius:      12px;
+}
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body{
+  width:100%; height:100%; overflow:hidden;
+  background: var(--green-dark);
+  font-family: -apple-system,'Hiragino Sans','Yu Gothic',sans-serif;
+  color: var(--white);
+  -webkit-text-size-adjust:100%;
+}
+
+/* ===== SCREENS ===== */
+.screen{
+position:fixed; top:0;left:0;right:0;bottom:0;
+display:none; flex-direction:column; overflow-y:auto;
+-webkit-overflow-scrolling:touch;
+}
+.screen.active{ display:flex; }
+
+/* ===== HOME ===== */
+#homeScreen{ background:var(–green-dark); }
+
+.home-body{
+flex:1; padding:14px;
+overflow-y:auto; -webkit-overflow-scrolling:touch;
+padding-top: calc(env(safe-area-inset-top,44px) + 10px);
+padding-bottom: calc(env(safe-area-inset-bottom,0px) + 80px);
+}
+
+/* カード */
+.card{
+background: #1e5c1e;
+border: 1.5px solid #4aaa4a;
+border-radius: var(–radius);
+padding:16px; margin-bottom:12px;
+}
+.card-title{
+font-size:11px; font-weight:800; color:rgba(255,255,255,0.65);
+text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;
+}
+
+/* 入力フィールド */
+.field{ margin-bottom:12px; }
+.field:last-child{ margin-bottom:0; }
+.field label{
+display:flex; align-items:center; gap:6px;
+font-size:13px; font-weight:800; color:#ffffff; margin-bottom:6px;
+}
+.req{ color:#ff8080; font-size:11px; font-weight:700; }
+.opt{ color:rgba(255,255,255,0.45); font-size:11px; }
+.field input{
+width:100%;
+background: #0f2a0f;
+border: 2px solid #4aaa4a;
+border-radius:10px;
+padding:12px 14px; font-size:16px;
+font-family:inherit; color:#ffffff;
+outline:none; -webkit-appearance:none; appearance:none;
+}
+.field input:focus{ border-color: #FFD700; background:#1a3a1a; }
+.field input::placeholder{ color:rgba(255,255,255,0.35); }
+
+/* ステータス */
+.status-grid4{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; }
+.status-opt{
+padding:12px 4px; border-radius:10px;
+border:2px solid rgba(255,255,255,0.25);
+background: #0f2a0f;
+font-size:14px; font-weight:800; font-family:inherit;
+color:rgba(255,255,255,0.55); cursor:pointer; text-align:center;
+}
+.status-opt.sel-mae{ border-color:#60a5fa; background:rgba(37,99,235,0.4); color:#ffffff; }
+.status-opt.sel-chu{ border-color:#fb923c; background:rgba(234,88,12,0.4); color:#ffffff; }
+.status-opt.sel-ato{ border-color:#4ade80; background:rgba(22,163,74,0.4); color:#ffffff; }
+.status-opt.sel-free{ border-color:#FFD700; background:rgba(217,168,67,0.3); color:#FFD700; }
+
+/* 連番 */
+.seq-row{ display:flex; align-items:center; justify-content:space-between; }
+.seq-display{ font-size:42px; font-weight:800; color:#FFD700; letter-spacing:3px; }
+.seq-actions{ display:flex; gap:8px; }
+.seq-btn{
+width:46px; height:46px; border-radius:10px;
+border:2px solid #4aaa4a; background:#0f2a0f;
+font-size:22px; cursor:pointer; color:#ffffff;
+display:flex; align-items:center; justify-content:center;
+}
+.seq-hint{
+margin-top:10px; font-size:12px; color:rgba(255,255,255,0.55);
+background:#0f2a0f; border-radius:8px; padding:8px 10px;
+line-height:1.6; word-break:break-all; font-family:monospace;
+border:1px solid #4aaa4a;
+}
+
+/* 撮影ボタン */
+.start-btn{
+position:fixed; bottom:0; left:0; right:0;
+background:#2d6e2d;
+border-top:2px solid #4aaa4a;
+border-left:none; border-right:none; border-bottom:none;
+color:#ffffff;
+padding:20px 20px calc(env(safe-area-inset-bottom,0px) + 20px);
+font-size:18px; font-weight:800; font-family:inherit;
+cursor:pointer; -webkit-appearance:none;
+display:flex; align-items:center; justify-content:center; gap:8px;
+z-index:10;
+text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+letter-spacing:0.5px;
+}
+.start-btn:active{ background:#3a8a3a; }
+
+/* 履歴ボタン */
+.hist-fab{
+position:fixed;
+top: calc(env(safe-area-inset-top,44px) + 10px);
+right:14px;
+background:#2d6e2d;
+border:2px solid #4aaa4a;
+border-radius:20px;
+color:#ffffff; font-size:13px; font-weight:700; font-family:inherit;
+padding:9px 16px; cursor:pointer; z-index:20;
+text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+/* 使い方ボタン */
+.readme-fab{
+position:fixed;
+top: calc(env(safe-area-inset-top,44px) + 52px);
+right:14px;
+background:#1a3a6e;
+border:2px solid #5b8fd4;
+border-radius:20px;
+color:#ffffff; font-size:13px; font-weight:700; font-family:inherit;
+padding:9px 16px; cursor:pointer; z-index:20;
+text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* ===== CAMERA ===== */
+#cameraScreen{ background:#000; overflow:hidden; }
+#videoWrap{
+position:fixed; top:0;left:0;right:0;bottom:0;
+background:#000; z-index:1;
+}
+#videoEl{
+position:absolute; top:50%; left:50%;
+transform:translate(-50%,-50%);
+min-width:100%; min-height:100%;
+width:auto; height:auto;
+object-fit:cover;
+}
+
+/* ===== 電子黒板（ドラッグ可能）===== */
+#blackboard{
+position:fixed;
+left:12px; bottom:160px;
+z-index:20;
+cursor:grab;
+touch-action:none;
+user-select:none;
+}
+#blackboard:active{ cursor:grabbing; }
+
+.bb-wrap{
+background: #2d6e2d;
+border: 2px solid rgba(255,255,255,0.85);
+border-radius:4px;
+width: 220px;
+/* 4:3 比率 → 高さ=165px: 行×5で均等に埋める */
+display: flex;
+flex-direction: column;
+overflow:hidden;
+box-shadow: 3px 3px 16px rgba(0,0,0,0.75);
+}
+
+/* 黒板の各行 */
+.bb-row{
+display:flex;
+border-bottom:1px solid rgba(255,255,255,0.6);
+flex: 1;              /* 親の高さを均等分割 */
+min-height:28px;
+}
+.bb-row.no-bottom{ border-bottom:none; }
+
+.bb-key{
+background: rgba(0,0,0,0.2);
+border-right:1px solid rgba(255,255,255,0.6);
+padding:3px 5px;
+font-size:10px; font-weight:800; color:#ffffff;
+min-width:54px; max-width:54px;
+display:flex; align-items:center; justify-content:space-between;
+text-align:justify; text-align-last:justify;
+text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.bb-val-cell{
+flex:1; padding:3px 6px;
+font-size:10px; color:#ffffff; font-weight:600;
+word-break:break-all; line-height:1.4;
+display:flex; align-items:center;
+text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* 中段スペース（ステータス＋フリー）*/
+.bb-mid{
+border-bottom:1px solid rgba(255,255,255,0.6);
+padding:6px 8px;
+flex: 1.2;
+min-height:32px;
+display:flex; flex-direction:column; gap:4px;
+justify-content:center; align-items:center;
+}
+.bb-status-badge{
+font-size:11px; font-weight:800; color:#ffffff;
+padding:2px 14px; border-radius:10px;
+text-align:center;
+text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.bb-free{
+font-size:11px; color:#ffffff;
+font-weight:600;
+line-height:1.5; white-space:pre-wrap;
+text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* 撮影日時行 — 黒板枠の外・下 */
+.bb-time-row{
+display:flex; align-items:center; justify-content:center;
+padding:4px 8px 2px;
+font-size:11px; font-family:monospace; color:#FFD700;
+font-weight:800;
+text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+background: transparent;
+/* 枠と同じ幅に揃える */
+width: 220px;
+box-sizing: border-box;
+}
+
+/* カメラUI */
+.cam-topbar{
+position:fixed; top:0;left:0;right:0; z-index:30;
+background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);
+padding-top:env(safe-area-inset-top,44px);
+padding-left:16px; padding-right:16px; padding-bottom:16px;
+display:flex; justify-content:space-between; align-items:center;
+}
+.cam-close{
+width:40px; height:40px; border-radius:20px;
+background:rgba(0,0,0,0.55); border:none; color:white;
+font-size:18px; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+}
+.cam-seq{ text-align:center; }
+.cam-seq-num{ font-size:28px; font-weight:700; color:white; font-family:monospace; }
+.cam-seq-label{ font-size:10px; color:rgba(255,255,255,0.6); margin-top:1px; }
+.cam-flash{
+width:40px; height:40px; border-radius:20px;
+background:rgba(0,0,0,0.55); border:none; color:white;
+font-size:18px; cursor:pointer;
+display:flex; align-items:center; justify-content:center;
+}
+.cam-bottombar{
+position:fixed; bottom:0;left:0;right:0; z-index:30;
+background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);
+padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px);
+padding-top:20px; padding-left:16px; padding-right:16px;
+display:flex; justify-content:space-around; align-items:center;
+}
+.cam-side-btn{
+display:flex; flex-direction:column; align-items:center; gap:4px;
+background:none; border:none; color:white; cursor:pointer; min-width:64px;
+}
+.cam-side-btn span:first-child{ font-size:28px; }
+.cam-side-label{ font-size:11px; opacity:.85; font-family:inherit; }
+
+.shutter{
+width:76px; height:76px; border-radius:50%;
+background:white; border:4px solid rgba(255,255,255,0.5);
+display:flex; align-items:center; justify-content:center;
+cursor:pointer; -webkit-appearance:none;
+}
+.shutter:active{ transform:scale(0.93); }
+.shutter-inner{
+width:62px; height:62px; border-radius:50%;
+background:white; border:2px solid #ccc;
+}
+.shutter.saving{ opacity:0.5; }
+
+/* ===== PREVIEW ===== */
+#previewScreen{ background:#000; overflow:hidden; }
+.preview-img-wrap{
+flex:1; display:flex; align-items:center; justify-content:center;
+background:#000; min-height:0;
+}
+#previewImg{ max-width:100%; max-height:100%; object-fit:contain; }
+.preview-footer{
+background: #0f2a0f;
+border-top:2px solid #4aaa4a;
+padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 16px);
+flex-shrink:0;
+}
+.preview-filename{
+background:#1e5c1e; border:1.5px solid #4aaa4a;
+border-radius:10px; padding:10px 14px; margin-bottom:14px;
+}
+.preview-filename-label{ font-size:11px; color:rgba(255,255,255,0.65); margin-bottom:4px; font-weight:700; }
+.preview-filename-val{ font-family:monospace; font-size:13px; color:#FFD700; word-break:break-all; font-weight:700; }
+.save-hint{ font-size:12px; color:rgba(255,255,255,0.55); text-align:center; margin-bottom:10px; }
+.save-btns{ display:flex; gap:8px; margin-bottom:10px; }
+.save-btn-camera{
+flex:1; background:#1a3a6e; color:#ffffff;
+border:2px solid #5b8fd4;
+border-radius:12px; padding:13px 8px; font-size:14px; font-weight:800;
+font-family:inherit; cursor:pointer; -webkit-appearance:none;
+text-align:center; line-height:1.4;
+text-shadow:0 1px 3px rgba(0,0,0,0.5);
+}
+.save-btn-camera:active{ background:#24519e; }
+.save-btn-file{
+flex:1; background:#4a2d0f; color:#ffffff;
+border:2px solid #d4843a;
+border-radius:12px; padding:13px 8px; font-size:14px; font-weight:800;
+font-family:inherit; cursor:pointer; -webkit-appearance:none;
+text-align:center; line-height:1.4;
+text-shadow:0 1px 3px rgba(0,0,0,0.5);
+}
+.save-btn-file:active{ background:#6b4010; }
+.save-note{ font-size:10px; font-weight:400; opacity:0.75; display:block; margin-top:2px; }
+.preview-btns{ display:flex; gap:10px; }
+.preview-continue{
+flex:1; background:#2d6e2d; color:#ffffff;
+border:2px solid #6abf6a;
+border-radius:12px; padding:16px; font-size:17px; font-weight:800;
+font-family:inherit; cursor:pointer; -webkit-appearance:none;
+text-shadow:0 1px 3px rgba(0,0,0,0.5);
+}
+.preview-continue:active{ background:#3a8a3a; }
+.preview-home{
+background:#1e5c1e; color:#ffffff;
+border:2px solid #6abf6a;
+border-radius:12px; padding:16px 18px; font-size:15px; font-weight:800;
+font-family:inherit; cursor:pointer; -webkit-appearance:none;
+text-shadow:0 1px 3px rgba(0,0,0,0.4);
+}
+.preview-home:active{ background:#2d6e2d; }
+
+/* ===== HISTORY ===== */
+#historyScreen{ background:var(–green-dark); color:var(–white); }
+.hist-header{
+background:var(–green-mid);
+border-bottom:1px solid var(–green-light);
+padding:env(safe-area-inset-top,44px) 16px 14px;
+display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.hist-header h2{ color:white; font-size:17px; font-weight:700; }
+.hist-back{ background:none; border:none; color:white; font-size:14px; cursor:pointer; font-family:inherit; padding:4px; }
+.hist-clear{ background:none; border:none; color:#f87171; font-size:13px; cursor:pointer; font-family:inherit; }
+.hist-list{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.hist-item{
+display:flex; align-items:center; gap:10px;
+padding:12px 16px;
+background:var(–green-mid);
+border-bottom:1px solid var(–green-dark);
+}
+.hist-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.hist-info{ flex:1; min-width:0; }
+.hist-fname{ font-size:12px; font-weight:700; font-family:monospace; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hist-meta{ font-size:11px; color:rgba(255,255,255,0.45); margin-top:2px; }
+.hist-badge{ font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; color:white; flex-shrink:0; }
+.hist-empty{ display:flex; align-items:center; justify-content:center; flex:1; color:rgba(255,255,255,0.3); font-size:15px; }
+.hist-del-btn{
+background:none; border:1.5px solid #f87171; border-radius:8px;
+color:#f87171; font-size:12px; font-weight:700; font-family:inherit;
+padding:5px 10px; cursor:pointer; flex-shrink:0;
+}
+.hist-del-btn:active{ background:rgba(248,113,113,0.2); }
+.hist-count{
+font-size:12px; color:rgba(255,255,255,0.5);
+padding:10px 16px 6px; font-weight:700;
+}
+
+/* ===== RESOLUTION MODE ===== */
+.res-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:0; }
+.res-btn{
+background:#0f2a0f; border:2px solid rgba(255,255,255,0.2);
+border-radius:10px; padding:10px 4px; font-size:12px; font-weight:700;
+font-family:inherit; color:rgba(255,255,255,0.45); cursor:pointer;
+text-align:center; line-height:1.3; -webkit-appearance:none;
+}
+.res-btn.res-active{
+border-color:#4ade80; background:rgba(22,163,74,0.25); color:#4ade80;
+}
+.res-btn .res-sub{ display:block; font-size:9px; font-weight:400; opacity:0.75; margin-top:3px; }
+
+/* ===== TIME MODE ===== */
+.time-mode-btn{
+background:#0f2a0f; border:2px solid rgba(255,255,255,0.2);
+border-radius:10px; padding:10px 4px; font-size:13px; font-weight:700;
+font-family:inherit; color:rgba(255,255,255,0.45); cursor:pointer;
+text-align:center; line-height:1.2; -webkit-appearance:none;
+}
+.time-mode-btn.tm-active{
+border-color:#FFD700; background:rgba(212,168,67,0.25); color:#FFD700;
+}
+
+/* ===== README ===== */
+.rm-card{
+background:#1e5c1e; border:1.5px solid #4aaa4a;
+border-radius:12px; padding:16px; margin-bottom:14px;
+}
+.rm-head{
+font-size:15px; font-weight:800; color:#ffffff;
+margin-bottom:12px; padding-bottom:8px;
+border-bottom:1px solid rgba(255,255,255,0.15);
+}
+.rm-step{
+display:flex; gap:12px; align-items:flex-start;
+margin-bottom:10px; font-size:13px; color:rgba(255,255,255,0.85); line-height:1.7;
+}
+.rm-num{
+background:#2d6e2d; border:1.5px solid #4aaa4a;
+border-radius:50%; width:24px; height:24px; min-width:24px;
+display:flex; align-items:center; justify-content:center;
+font-size:12px; font-weight:800; color:#ffffff;
+}
+.rm-row{
+display:flex; gap:12px; align-items:flex-start;
+margin-bottom:10px; font-size:13px; color:rgba(255,255,255,0.85); line-height:1.7;
+}
+.rm-icon{ font-size:18px; min-width:26px; text-align:center; }
+
+/* ===== MISC ===== */
+.flash-overlay{ position:fixed; inset:0; background:white; opacity:0; pointer-events:none; z-index:999; transition:opacity 0.06s; }
+.flash-overlay.on{ opacity:1; }
+.toast{
+position:fixed; bottom:120px; left:50%; transform:translateX(-50%);
+background:rgba(10,30,10,0.95); border:1px solid var(–green-light);
+color:white; padding:12px 20px; border-radius:100px; font-size:13px;
+z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-events:none;
+}
+.toast.show{ opacity:1; }
+</style>
+
+</head>
+<body>
+
+<div class="flash-overlay" id="flashOverlay"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ===== HOME ===== -->
+
+<div class="screen active" id="homeScreen">
+  <!-- アプリ名・バージョン -->
+  <div style="
+    position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
+    z-index:20; line-height:1.3; pointer-events:none;
+  ">
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v30</div>
+  </div>
+  <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
+  <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
+  <div class="home-body">
+
+```
+<div class="card">
+  <div class="card-title">工事情報</div>
+  <div class="field">
+    <label>工事件名 <span class="opt">任意</span></label>
+    <input type="text" id="projectName" placeholder="例：〇〇邸 外壁改修工事" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>施工場所 <span class="req">＊必須</span></label>
+    <input type="text" id="location" placeholder="例：1階廊下 / 外壁南面" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>工種 <span class="req">＊必須</span></label>
+    <input type="text" id="workType" placeholder="例：塗装工事 / 防水工事" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>施工業者 <span class="opt">任意</span></label>
+    <input type="text" id="contractor" placeholder="例：〇〇建設株式会社" autocomplete="off">
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">作業ステータス（4択）</div>
+  <div class="status-grid4">
+    <button class="status-opt sel-mae" data-val="作業前" onclick="selectStatus(this)">作業前</button>
+    <button class="status-opt" data-val="作業中" onclick="selectStatus(this)">作業中</button>
+    <button class="status-opt" data-val="作業後" onclick="selectStatus(this)">作業後</button>
+    <button class="status-opt" data-val="フリー" onclick="selectStatus(this)">フリー</button>
+  </div>
+  <div id="freeStatusWrap" style="display:none;margin-top:10px;">
+    <input type="text" id="freeStatusInput" placeholder="例：絶縁測定・試運転 など"
+      style="width:100%;background:#0f2a0f;border:2px solid #FFD700;border-radius:10px;
+             padding:11px 14px;font-size:15px;font-family:inherit;color:#FFD700;
+             outline:none;-webkit-appearance:none;"
+      oninput="onFreeStatusInput(this.value)">
+  </div>
+</div>
+
+
+<div class="card">
+  <div class="card-title">📐 撮影解像度</div>
+  <div class="res-grid">
+    <button class="res-btn res-active" id="resBtn_cals1" onclick="setResMode('cals1')">
+      推奨サイズ
+      <span class="res-sub">1280×960</span>
+      <span class="res-sub">約123万画素</span>
+    </button>
+    <button class="res-btn" id="resBtn_cals2" onclick="setResMode('cals2')">
+      高精細サイズ
+      <span class="res-sub">2000×1500</span>
+      <span class="res-sub">300万画素</span>
+    </button>
+    <button class="res-btn" id="resBtn_full" onclick="setResMode('full')">
+      フル画素
+      <span class="res-sub">デバイス最大</span>
+      <span class="res-sub">制限なし</span>
+    </button>
+  </div>
+  <div id="resModeHint" style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.5);padding:6px 8px;background:#0f2a0f;border-radius:8px;line-height:1.6;"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">撮影日時の表示</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    <button class="time-mode-btn" id="tmBtn_datetime" onclick="setTimeMode('datetime')">
+      🕐 日時<span style="display:block;font-size:10px;font-weight:400;opacity:0.8;margin-top:2px;">年月日＋時刻</span>
+    </button>
+    <button class="time-mode-btn" id="tmBtn_date" onclick="setTimeMode('date')">
+      📅 日付<span style="display:block;font-size:10px;font-weight:400;opacity:0.8;margin-top:2px;">年月日のみ</span>
+    </button>
+    <button class="time-mode-btn" id="tmBtn_off" onclick="setTimeMode('off')">
+      🚫 OFF<span style="display:block;font-size:10px;font-weight:400;opacity:0.8;margin-top:2px;">表示しない</span>
+    </button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">連番管理</div>
+  <div class="seq-row">
+    <div class="seq-display" id="seqDisplay">001</div>
+    <div class="seq-actions">
+      <button class="seq-btn" onclick="changeSeq(-1)">－</button>
+      <button class="seq-btn" onclick="changeSeq(1)">＋</button>
+      <button class="seq-btn" onclick="resetSeq()">↺</button>
+    </div>
+  </div>
+  <div class="seq-hint" id="seqHint">施工場所_工種_作業前_001.jpg</div>
+</div>
+```
+
+  </div>
+  <button class="start-btn" onclick="startCamera()">📷 撮影を開始する</button>
+</div>
+
+<!-- ===== CAMERA ===== -->
+
+<div class="screen" id="cameraScreen">
+  <div id="videoWrap">
+    <video id="videoEl" autoplay playsinline webkit-playsinline muted></video>
+  </div>
+
+  <!-- 電子黒板（ドラッグ可能） -->
+
+  <div id="blackboard">
+    <div class="bb-wrap">
+      <!-- 工事件名 -->
+      <div class="bb-row">
+        <div class="bb-key"><span>工</span><span>事</span><span>件</span><span>名</span></div>
+        <div class="bb-val-cell" id="bbProject">—</div>
+      </div>
+      <!-- 施工場所 -->
+      <div class="bb-row">
+        <div class="bb-key"><span>工</span><span>事</span><span>場</span><span>所</span></div>
+        <div class="bb-val-cell" id="bbLocation">—</div>
+      </div>
+      <!-- 工種 -->
+      <div class="bb-row">
+        <div class="bb-key"><span>工</span><span>　</span><span>　</span><span>種</span></div>
+        <div class="bb-val-cell" id="bbWorkType">—</div>
+      </div>
+      <!-- 中段スペース（ステータス＋フリー） -->
+      <div class="bb-mid">
+        <div class="bb-status-badge" id="bbBadge">作業前</div>
+        <div class="bb-free" id="bbFree"></div>
+      </div>
+      <!-- 施工業者（最終行・枠の中） -->
+      <div class="bb-row no-bottom">
+        <div class="bb-key"><span>施</span><span>工</span><span>者</span></div>
+        <div class="bb-val-cell" id="bbContractor">—</div>
+      </div>
+    </div>
+    <!-- 撮影日時：枠の外・下に表示 -->
+    <div class="bb-time-row" id="bbTime">2026/03/10 00:00:00</div>
+  </div>
+
+  <div class="cam-topbar">
+    <button class="cam-close" onclick="stopCamera()">✕</button>
+    <div class="cam-seq">
+      <div class="cam-seq-num" id="camSeqNum">001</div>
+      <div class="cam-seq-label">連番</div>
+    </div>
+    <button class="cam-flash" id="flashBtn" onclick="toggleFlash()">⚡</button>
+  </div>
+
+  <div class="cam-bottombar">
+    <button class="cam-side-btn" onclick="cycleStatus()">
+      <span>📝</span>
+      <span class="cam-side-label" id="statusLabel">作業前</span>
+    </button>
+    <div class="shutter" id="shutterBtn" onclick="capture()">
+      <div class="shutter-inner"></div>
+    </div>
+    <button class="cam-side-btn" onclick="flipCamera()">
+      <span>🔄</span>
+      <span class="cam-side-label">反転</span>
+    </button>
+  </div>
+  <!-- 撮影日時トグル（カメラ画面内）→ タップで3択ループ -->
+  <button id="camTimeToggle" onclick="cycleTimeMode()"
+    style="position:fixed;top:calc(env(safe-area-inset-top,44px) + 56px);right:10px;z-index:31;
+           background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.3);border-radius:14px;
+           color:white;font-size:11px;font-weight:700;font-family:inherit;padding:5px 10px;cursor:pointer;">
+    🕐 日時
+  </button>
+</div>
+
+<!-- ===== PREVIEW ===== -->
+
+<div class="screen" id="previewScreen">
+  <div class="preview-img-wrap">
+    <img id="previewImg" src="" alt="">
+  </div>
+  <div class="preview-footer">
+    <div class="preview-filename">
+      <div class="preview-filename-label">📁 ファイル名</div>
+      <div class="preview-filename-val" id="previewFname">—</div>
+    </div>
+    <!-- 保存ボタン2種 -->
+    <div class="save-btns">
+      <button class="save-btn-camera" onclick="saveToCamera()">
+        📸 写真Appに保存
+        <span class="save-note">長押し→「写真を保存」</span>
+        <span class="save-note">※ファイル名はIMG_XXXXになります</span>
+      </button>
+      <button class="save-btn-file" onclick="saveToFile()">
+        📂 ファイルAppに保存
+        <span class="save-note">正しいファイル名で保存</span>
+        <span class="save-note">例：1階_照明工事_作業前_001.jpg</span>
+      </button>
+    </div>
+    <div class="save-hint" id="saveHintMsg"></div>
+    <div class="preview-btns">
+      <button class="preview-continue" onclick="continueCapture()">📷 続けて撮影</button>
+      <button class="preview-home" onclick="goHome()">🏠 設定変更</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HISTORY ===== -->
+
+<div class="screen" id="historyScreen">
+  <div class="hist-header">
+    <button class="hist-back" onclick="goHome()">← 戻る</button>
+    <h2>撮影履歴</h2>
+    <button class="hist-clear" onclick="clearHistory()">🗑 一括削除</button>
+  </div>
+  <div class="hist-count" id="histCount"></div>
+  <div class="hist-list" id="histList"></div>
+</div>
+
+<!-- ===== README ===== -->
+
+<div class="screen" id="readmeScreen">
+  <div class="hist-header" style="background:#1a3a6e;border-bottom:1px solid #5b8fd4;">
+    <button class="hist-back" onclick="goHome()">← 戻る</button>
+    <h2 style="color:white;">📖 取扱説明書</h2>
+    <div style="width:48px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:40px;">
+
+```
+<!-- バージョン -->
+<div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v30</div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
+</div>
+
+<!-- 基本的な使い方 -->
+<div class="rm-card">
+  <div class="rm-head">📋 基本的な使い方</div>
+  <div class="rm-step"><span class="rm-num">1</span><div><strong>工事情報を入力</strong><br>工事件名・施工場所・工種・施工業者を入力します。施工場所と工種は必須です。</div></div>
+  <div class="rm-step"><span class="rm-num">2</span><div><strong>作業ステータスを選択</strong><br>作業前／作業中／作業後／フリーワード の4択から選びます。</div></div>
+  <div class="rm-step"><span class="rm-num">3</span><div><strong>撮影を開始する</strong><br>下部の「📷 撮影を開始する」ボタンをタップしてカメラを起動します。</div></div>
+  <div class="rm-step"><span class="rm-num">4</span><div><strong>写真を撮る</strong><br>シャッターボタンをタップ。電子黒板が写真に自動で焼き込まれます。</div></div>
+  <div class="rm-step"><span class="rm-num">5</span><div><strong>写真を保存する</strong><br>撮影後の画面で保存方法を選んで保存します。</div></div>
+</div>
+
+<!-- 保存方法の違い -->
+<div class="rm-card" style="border-color:#5b8fd4;">
+  <div class="rm-head" style="color:#60a5fa;">💾 保存方法の違い（重要）</div>
+
+  <div style="background:rgba(37,99,235,0.2);border:1.5px solid #5b8fd4;border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:15px;font-weight:800;color:#93c5fd;margin-bottom:8px;">📸 写真Appに保存</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;">
+      ・保存先：<strong style="color:white;">カメラロール（写真App）</strong><br>
+      ・ファイル名：<strong style="color:#f87171;">IMG_0001 など自動付与</strong><br>
+      ・操作：写真を長押し →「写真を保存」をタップ<br>
+      ・特徴：写真Appから見やすく、他アプリへの共有が簡単
+    </div>
+    <div style="margin-top:10px;padding:8px 10px;background:rgba(248,113,113,0.15);border-radius:8px;font-size:12px;color:#fca5a5;">
+      ⚠️ iOSの仕様でブラウザからはファイル名を指定できません。<br>カメラロールに保存すると必ず IMG_XXXX になります。
+    </div>
+  </div>
+
+  <div style="background:rgba(180,83,9,0.2);border:1.5px solid #d4843a;border-radius:10px;padding:14px;">
+    <div style="font-size:15px;font-weight:800;color:#fdba74;margin-bottom:8px;">📂 ファイルAppに保存</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;">
+      ・保存先：<strong style="color:white;">ファイルApp（iCloud Driveなど）</strong><br>
+      ・ファイル名：<strong style="color:#4ade80;">1階_照明工事_作業前_001.jpg（正しい名前）</strong><br>
+      ・操作：ボタンを1タップで自動ダウンロード<br>
+      ・特徴：工事写真帳のExcelへの取り込みに最適
+    </div>
+    <div style="margin-top:10px;padding:8px 10px;background:rgba(74,222,128,0.1);border-radius:8px;font-size:12px;color:#86efac;">
+      ✅ ファイル名が正しく保存されるため、Excel工事写真帳への<br>取り込み作業がスムーズです。工事写真帳利用時はこちら推奨。
+    </div>
+  </div>
+</div>
+
+<!-- 電子黒板操作 -->
+<div class="rm-card">
+  <div class="rm-head">🖼 電子黒板の操作</div>
+  <div class="rm-row"><span class="rm-icon">👆</span><div><strong>移動</strong>：黒板を1本指でドラッグして自由に配置できます。</div></div>
+  <div class="rm-row"><span class="rm-icon">🤏</span><div><strong>サイズ変更</strong>：2本指のピンチ操作で拡大・縮小。文字も比例して変わります（0.5〜2倍）。</div></div>
+  <div class="rm-row"><span class="rm-icon">📝</span><div><strong>ステータス切替</strong>：カメラ画面左下の📝ボタンで作業前→中→後→フリーワードを切り替えられます。</div></div>
+  <div class="rm-row"><span class="rm-icon">🕐</span><div><strong>撮影日時 ON/OFF</strong>：ホーム画面またはカメラ画面右上のボタンで日時表示を切り替えられます。</div></div>
+</div>
+
+<!-- ファイル名のルール -->
+<div class="rm-card">
+  <div class="rm-head">📁 ファイル名のルール</div>
+  <div style="background:#0f2a0f;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#FFD700;margin-bottom:10px;word-break:break-all;">
+    施工場所_工種_ステータス_連番.jpg<br>
+    <span style="color:rgba(255,255,255,0.5);font-size:11px;">例：1階廊下_照明工事_作業前_001.jpg</span>
+  </div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.8;">
+    ・連番は撮影するたびに自動で+1されます<br>
+    ・連番は手動で変更・リセットも可能です<br>
+    ・スペースや記号は自動で除去されます
+  </div>
+</div>
+
+<!-- 撮影履歴 -->
+<div class="rm-card">
+  <div class="rm-head">📂 撮影履歴</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.9;">
+    ・ホーム右上の「📂 履歴」ボタンで確認できます<br>
+    ・最大300件まで記録されます<br>
+    ・1件ずつ削除または一括削除が可能です<br>
+    ・削除前に確認ポップアップが表示されます
+  </div>
+</div>
+
+<!-- 撮影解像度 -->
+<div class="rm-card" style="border-color:#4ade80;">
+  <div class="rm-head" style="color:#4ade80;">📐 撮影解像度について</div>
+
+  <!-- なぜ解像度が重要か -->
+  <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;margin-bottom:14px;">
+    公共工事のデジタル写真は、国土交通省「デジタル写真管理情報基準」により<strong style="color:white;">100万〜300万画素程度</strong>が標準とされています。<br>
+    高画素すぎると電子納品時に以下の問題が起きます。
+  </div>
+  <div style="background:rgba(248,113,113,0.12);border:1px solid #f87171;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+    <div style="font-size:12px;color:#fca5a5;line-height:1.9;">
+      ⚠️ <strong style="color:white;">ファイル容量の肥大化</strong>：サーバーを圧迫し転送・バックアップに時間がかかる<br>
+      ⚠️ <strong style="color:white;">閲覧ソフトの動作遅延</strong>：高解像度すぎると表示が重くなり検査効率が低下<br>
+      ⚠️ <strong style="color:white;">リサイズ禁止</strong>：撮影後の加工は「改ざん」とみなされるリスクがある
+    </div>
+  </div>
+
+  <!-- 3モードの説明 -->
+  <div class="rm-head" style="font-size:13px;border-bottom:none;padding-bottom:4px;margin-bottom:8px;">選べる3つのモード</div>
+
+  <div style="background:rgba(22,163,74,0.15);border:1.5px solid #4ade80;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+    <div style="font-size:14px;font-weight:800;color:#4ade80;margin-bottom:6px;">🟢 推奨サイズ（公共工事向け標準）</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;">
+      ・解像度：<strong style="color:white;">1,280 × 960 px（約123万画素）</strong><br>
+      ・アスペクト比：4:3（国土交通省基準準拠）<br>
+      ・国土交通省デジタル写真管理情報基準の目安に沿ったサイズ設定<br>
+      ・ファイルサイズが小さく、検査・共有が快適
+    </div>
+  </div>
+
+  <div style="background:rgba(96,165,250,0.12);border:1.5px solid #60a5fa;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+    <div style="font-size:14px;font-weight:800;color:#93c5fd;margin-bottom:6px;">🔵 高精細サイズ</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;">
+      ・解像度：<strong style="color:white;">2,000 × 1,500 px（300万画素）</strong><br>
+      ・アスペクト比：4:3<br>
+      ・黒板の文字が細かい場合や、細部の鮮明さが求められる現場に<br>
+      ・基準の目安上限にあたるサイズ（300万画素）
+    </div>
+  </div>
+
+  <div style="background:rgba(251,191,36,0.1);border:1.5px solid #fbbf24;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+    <div style="font-size:14px;font-weight:800;color:#fde68a;margin-bottom:6px;">🟡 フル画素</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.8;">
+      ・解像度：<strong style="color:white;">デバイスの最大解像度（制限なし）</strong><br>
+      ・iPhone・iPadのカメラ本来の画質そのまま<br>
+      ・社内管理や施主への報告用など、電子納品しない場合に
+    </div>
+    <div style="margin-top:8px;padding:6px 10px;background:rgba(251,191,36,0.15);border-radius:6px;font-size:11px;color:#fde68a;">
+      ⚠️ 公共工事の電子納品には原則使用しないこと
+    </div>
+  </div>
+
+  <!-- 運用のポイント -->
+  <div class="rm-head" style="font-size:13px;border-bottom:none;padding-bottom:4px;margin-bottom:8px;">💡 運用上のポイント</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.9;">
+    ・<strong style="color:white;">着工前に発注者の写真管理基準を必ず確認</strong>すること<br>　　※本アプリはCALS/EC規格の正式認定品ではありません<br>
+    ・自治体・工種（営繕・農林水産省等）により独自基準がある場合あり<br>
+    ・画素数より「<strong style="color:white;">黒板の文字がはっきり読めること</strong>」が最重要<br>
+    ・ピンボケ・光の反射・影に注意して撮影すること
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+const S = {
+  projectName:'', location:'', workType:'', contractor:'',
+  status:'作業前', freeStatusText:'', seq:1,
+  timeMode: 'datetime',  // 'datetime' | 'date' | 'off'
+  resMode: 'cals1',      // 'cals1'(1280x960) | 'cals2'(2048x1536) | 'full'
+  bbX:12, bbY:-1,
+};
+const SC = { '作業前':'#2563eb', '作業中':'#ea580c', '作業後':'#16a34a', 'フリー':'#b45309' };
+const SS = { '作業前':'sel-mae', '作業中':'sel-chu', '作業後':'sel-ato', 'フリー':'sel-free' };
+
+let stream=null, facing='environment', flashOn=false, clockTimer=null;
+
+// ===== PERSIST =====
+function save(){ try{ localStorage.setItem('kjs3',JSON.stringify(S)); }catch(e){} }
+function load(){ try{ Object.assign(S,JSON.parse(localStorage.getItem('kjs3')||'{}')); }catch(e){} }
+function getHist(){ try{ return JSON.parse(localStorage.getItem('kjs_h')||'[]'); }catch(e){ return []; } }
+function addHist(i){
+  const h=getHist(); h.unshift(i);
+  if(h.length>300) h.pop();
+  try{ localStorage.setItem('kjs_h',JSON.stringify(h)); }catch(e){}
+}
+
+// ===== UTILS =====
+function pad(n,d=3){ return String(n).padStart(d,'0'); }
+function clean(s){ return (s||'').trim().replace(/[\\/:*?"<>|\s]/g,'').slice(0,30); }
+function buildFname(){
+  const p=[];
+  if(S.location) p.push(clean(S.location));
+  if(S.workType)  p.push(clean(S.workType));
+  p.push(S.status); p.push(pad(S.seq));
+  return p.join('_')+'.jpg';
+}
+function nowStr(){
+  const d=new Date();
+  return `${d.getFullYear()}/${pad(d.getMonth()+1,2)}/${pad(d.getDate(),2)} ${pad(d.getHours(),2)}:${pad(d.getMinutes(),2)}:${pad(d.getSeconds(),2)}`;
+}
+function dateStr(){
+  const d=new Date();
+  return `${d.getFullYear()}/${pad(d.getMonth()+1,2)}/${pad(d.getDate(),2)}`;
+}
+function timeLabel(){
+  if(S.timeMode==='datetime') return nowStr();
+  if(S.timeMode==='date')     return dateStr();
+  return '';
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== HOME UI =====
+function refreshHome(){
+  document.getElementById('projectName').value = S.projectName||'';
+  document.getElementById('location').value    = S.location||'';
+  document.getElementById('workType').value    = S.workType||'';
+  document.getElementById('contractor').value  = S.contractor||'';
+  document.getElementById('seqDisplay').textContent = pad(S.seq);
+  refreshHint(); refreshStatusBtns(); refreshTimeMode(); refreshResMode();
+}
+// ===== RESOLUTION MODE =====
+const RES_CONFIG = {
+  cals1: { w:1280, h:960,  label:'推奨サイズ 1280×960（約123万画素）' },
+  cals2: { w:2000, h:1500, label:'高精細サイズ 2000×1500（300万画素）' },
+  full:  { w:null, h:null,  label:'フル画素（デバイス最大解像度）' },
+};
+function setResMode(mode){
+  S.resMode = mode; refreshResMode(); save();
+}
+function refreshResMode(){
+  const m = S.resMode || 'cals1';
+  ['cals1','cals2','full'].forEach(k=>{
+    const b=document.getElementById('resBtn_'+k);
+    if(b) b.classList.toggle('res-active', m===k);
+  });
+  const hint = document.getElementById('resModeHint');
+  if(hint) hint.textContent = '✅ ' + RES_CONFIG[m].label;
+}
+
+function setTimeMode(mode){
+  S.timeMode = mode;
+  refreshTimeMode(); save();
+}
+function cycleTimeMode(){
+  const modes=['datetime','date','off'];
+  S.timeMode = modes[(modes.indexOf(S.timeMode)+1)%3];
+  refreshTimeMode(); save();
+}
+function refreshTimeMode(){
+  const m = S.timeMode || 'datetime';
+  // ホーム3択ボタン
+  ['datetime','date','off'].forEach(k=>{
+    const b=document.getElementById('tmBtn_'+k);
+    if(b){ b.classList.toggle('tm-active', m===k); }
+  });
+  // カメラ内ボタン
+  const cb = document.getElementById('camTimeToggle');
+  if(cb){
+    const labels={'datetime':'🕐 日時','date':'📅 日付','off':'🚫 日時OFF'};
+    cb.textContent = labels[m];
+    cb.style.borderColor = m==='off' ? 'rgba(255,255,255,0.3)' : 'rgba(255,220,80,0.6)';
+    cb.style.color = m==='off' ? 'rgba(255,255,255,0.5)' : '#FFD700';
+  }
+  // 黒板の日時行
+  const bbTime = document.getElementById('bbTime');
+  if(bbTime) bbTime.style.display = m==='off' ? 'none' : 'flex';
+}
+function refreshHint(){ document.getElementById('seqHint').textContent=buildFname(); }
+function refreshStatusBtns(){
+  document.querySelectorAll('.status-opt').forEach(b=>{
+    b.className='status-opt';
+    if(b.dataset.val===S.status){
+      if(S.status==='フリー') b.classList.add('sel-free');
+      else b.classList.add(SS[S.status]);
+    }
+  });
+  // フリー入力欄の表示切替
+  const wrap=document.getElementById('freeStatusWrap');
+  if(wrap) wrap.style.display = S.status==='フリー' ? 'block' : 'none';
+  const inp=document.getElementById('freeStatusInput');
+  if(inp && S.status==='フリー') inp.value=S.freeStatusText||'';
+}
+function selectStatus(el){
+  S.status=el.dataset.val;
+  refreshStatusBtns(); refreshHint(); save();
+}
+function onFreeStatusInput(val){
+  S.freeStatusText=val; save();
+  refreshBlackboard();
+}
+function changeSeq(d){ S.seq=Math.max(1,S.seq+d); document.getElementById('seqDisplay').textContent=pad(S.seq); refreshHint(); save(); }
+function resetSeq(){
+  if(!confirm('連番を1にリセットしますか？')) return;
+  S.seq=1; document.getElementById('seqDisplay').textContent='001'; refreshHint(); save();
+}
+['projectName','location','workType','contractor'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',e=>{ S[id]=e.target.value; refreshHint(); save(); });
+});
+
+// ===== フリーテキストモーダル =====
+
+// ===== CAMERA =====
+async function startCamera(){
+  S.location       = document.getElementById('location').value.trim();
+  S.workType       = document.getElementById('workType').value.trim();
+  S.projectName    = document.getElementById('projectName').value.trim();
+  S.contractor     = document.getElementById('contractor').value.trim();
+  // フリーワード入力欄が表示中なら値を取得
+  const freeInp = document.getElementById('freeStatusInput');
+  if(freeInp && S.status==='フリー') S.freeStatusText = freeInp.value;
+  if(!S.location||!S.workType){ toast('⚠ 施工場所と工種を入力してください'); return; }
+  save();
+  showScreen('cameraScreen');
+  try{
+    // 解像度: resModeに応じたideal値でカメラ起動
+    const _rc = RES_CONFIG[S.resMode||'cals1'];
+    const _vidConstraint = _rc.w
+      ? { facingMode:{ideal:facing}, width:{ideal:_rc.w}, height:{ideal:_rc.h} }
+      : { facingMode:{ideal:facing} };
+    stream = await navigator.mediaDevices.getUserMedia({ video:_vidConstraint, audio:false });
+    const vid=document.getElementById('videoEl');
+    vid.srcObject=stream;
+    vid.onloadedmetadata=()=>vid.play().catch(()=>{});
+    initBBPosition();
+    refreshBlackboard();
+    startClock();
+  }catch(e){
+    console.error(e);
+    showScreen('homeScreen');
+    if(e.name==='NotAllowedError') toast('⚠ カメラ許可が必要です。設定→Safari→カメラを確認');
+    else toast('⚠ カメラ起動失敗: '+e.message);
+  }
+}
+function stopCamera(){ stopStream(); stopClock(); showScreen('homeScreen'); refreshHome(); }
+function stopStream(){
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  document.getElementById('videoEl').srcObject=null;
+}
+function startClock(){ stopClock(); clockTimer=setInterval(tickClock,1000); tickClock(); }
+function stopClock(){ if(clockTimer){ clearInterval(clockTimer); clockTimer=null; } }
+function tickClock(){ const t=timeLabel(); const el=document.getElementById('bbTime'); if(el){ el.textContent=t; el.style.display=t?'flex':'none'; } }
+
+function refreshBlackboard(){
+  const c=SC[S.status]||'#666';
+  const badge=document.getElementById('bbBadge');
+  // バッジは常にチョーク白・フリーはフリーワード表示
+  if(S.status==='フリー'){
+    badge.textContent = S.freeStatusText || 'フリーワード';
+  } else {
+    badge.textContent = S.status;
+  }
+  badge.style.background = 'rgba(255,255,255,0.12)';
+  badge.style.borderColor = 'rgba(255,255,255,0.7)';
+  badge.style.color = '#ffffff';
+  badge.style.display = 'inline-block';
+  document.getElementById('bbProject').textContent   = S.projectName||'—';
+  document.getElementById('bbLocation').textContent  = S.location||'—';
+  document.getElementById('bbWorkType').textContent  = S.workType||'—';
+  document.getElementById('bbContractor').textContent= S.contractor||'—';
+  document.getElementById('bbFree').textContent      = '';  // フリーステータスのテキストはバッジで表示
+  document.getElementById('statusLabel').textContent = S.status==='フリー' ? (S.freeStatusText||'フリーワード').slice(0,6) : S.status;
+  document.getElementById('camSeqNum').textContent   = pad(S.seq);
+  refreshTimeMode();
+}
+
+function cycleStatus(){
+  const opts=['作業前','作業中','作業後','フリー'];
+  S.status=opts[(opts.indexOf(S.status)+1)%4];
+  refreshBlackboard(); save();
+}
+function toggleFlash(){
+  flashOn=!flashOn;
+  document.getElementById('flashBtn').textContent=flashOn?'💡':'⚡';
+  if(stream){
+    const t=stream.getVideoTracks()[0];
+    if(t?.getCapabilities?.()?.torch) t.applyConstraints({advanced:[{torch:flashOn}]}).catch(()=>{});
+  }
+}
+async function flipCamera(){
+  facing=facing==='environment'?'user':'environment';
+  stopStream();
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({ video:{facingMode:{ideal:facing}}, audio:false });
+    const vid=document.getElementById('videoEl');
+    vid.srcObject=stream; vid.onloadedmetadata=()=>vid.play().catch(()=>{});
+  }catch(e){ toast('カメラ切替失敗'); }
+}
+
+// ===== 黒板ドラッグ =====
+function initBBPosition(){
+  const bb=document.getElementById('blackboard');
+  bb.style.left='12px';
+  bb.style.bottom='160px';
+  bb.style.top='';
+  // スケールもリセット
+  if(window._bbResetScale) window._bbResetScale();
+}
+
+(function setupBB(){
+  const bb = document.getElementById('blackboard');
+  bb.style.transformOrigin = 'top left';
+
+  let dragging = false;
+  let startX=0, startY=0, origLeft=0, origTop=0;
+
+  let bbScale = 1.0;
+  // カメラ再起動時にスケールをリセットできるよう外部公開
+  window._bbResetScale = function(){ bbScale=1.0; bb.style.transform='scale(1)'; };
+  let pinching = false;
+  let startDist = 0, startScale = 1.0;
+
+  function dist(t){
+    return Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
+  }
+  function applyScale(s){
+    bbScale = Math.max(0.5, Math.min(2.0, s));
+    bb.style.transform = `scale(${bbScale})`;
+  }
+  function getLogicalPos(){
+    // getBoundingClientRect は scale後の位置を返すので
+    // style.left / style.top から取る
+    return {
+      left: parseFloat(bb.style.left) || 0,
+      top:  parseFloat(bb.style.top)  || 0
+    };
+  }
+  function clamp(left, top){
+    // 表示上のサイズ = offsetSize * scale
+    const dispW = bb.offsetWidth  * bbScale;
+    const dispH = bb.offsetHeight * bbScale;
+    return {
+      left: Math.max(0, Math.min(window.innerWidth  - dispW, left)),
+      top:  Math.max(0, Math.min(window.innerHeight - dispH, top))
+    };
+  }
+
+  // ===== タッチ =====
+  bb.addEventListener('touchstart', e=>{
+    if(e.touches.length === 2){
+      pinching = true;
+      dragging = false;
+      startDist  = dist(e.touches);
+      startScale = bbScale;
+      e.preventDefault();
+    } else if(e.touches.length === 1 && !pinching){
+      dragging = true;
+      const pos = getLogicalPos();
+      origLeft = pos.left; origTop = pos.top;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      bb.style.bottom = 'auto';
+      e.preventDefault();
+    }
+  },{passive:false});
+
+  bb.addEventListener('touchmove', e=>{
+    if(pinching && e.touches.length === 2){
+      const d = dist(e.touches);
+      applyScale(startScale * (d / startDist));
+      e.preventDefault();
+    } else if(dragging && e.touches.length === 1){
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      const p  = clamp(origLeft + dx, origTop + dy);
+      bb.style.left = p.left + 'px';
+      bb.style.top  = p.top  + 'px';
+      e.preventDefault();
+    }
+  },{passive:false});
+
+  bb.addEventListener('touchend', e=>{
+    if(e.touches.length < 2) pinching = false;
+    if(e.touches.length === 0) dragging = false;
+  });
+
+  // ===== マウス（PC確認用）=====
+  bb.addEventListener('mousedown', e=>{
+    dragging = true;
+    const pos = getLogicalPos();
+    origLeft = pos.left; origTop = pos.top;
+    startX = e.clientX; startY = e.clientY;
+    bb.style.bottom = 'auto';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const p = clamp(origLeft+(e.clientX-startX), origTop+(e.clientY-startY));
+    bb.style.left = p.left+'px';
+    bb.style.top  = p.top +'px';
+  });
+  document.addEventListener('mouseup', ()=>{ dragging=false; });
+
+  // ===== 縦横回転：画面外に出ないようクランプ =====
+  function onResize(){
+    setTimeout(()=>{
+      const pos = getLogicalPos();
+      const p = clamp(pos.left, pos.top);
+      bb.style.left = p.left+'px';
+      bb.style.top  = p.top +'px';
+      bb.style.bottom = 'auto';
+    }, 300);
+  }
+  window.addEventListener('orientationchange', onResize);
+  window.addEventListener('resize', onResize);
+})();
+
+// ===== CAPTURE =====
+async function capture(){
+  const btn=document.getElementById('shutterBtn');
+  if(btn.classList.contains('saving')) return;
+  btn.classList.add('saving');
+  const fl=document.getElementById('flashOverlay');
+  fl.classList.add('on'); setTimeout(()=>fl.classList.remove('on'),120);
+
+  try{
+    const vid = document.getElementById('videoEl');
+    const vw = vid.videoWidth  || 1280;
+    const vh = vid.videoHeight || 720;
+    const SW = window.innerWidth;   // 画面幅
+    const SH = window.innerHeight;  // 画面高さ
+
+    // ===== Step1: 画面と同じサイズのcanvasにcover描画 =====
+    // CSS object-fit:cover と全く同じ計算でビデオを描く
+    // → 画面座標 = canvas座標 が成立する
+    const scrCanvas = document.createElement('canvas');
+    scrCanvas.width  = SW;
+    scrCanvas.height = SH;
+    const scrCtx = scrCanvas.getContext('2d');
+
+    // cover スケール: 画面をビデオで埋める最小スケール
+    const scaleX = SW / vw;
+    const scaleY = SH / vh;
+    const coverScale = Math.max(scaleX, scaleY);
+    // ビデオを画面に貼る位置（中央配置、はみ出し可）
+    const drawW = vw * coverScale;
+    const drawH = vh * coverScale;
+    const drawX = (SW - drawW) / 2;
+    const drawY = (SH - drawH) / 2;
+    scrCtx.drawImage(vid, drawX, drawY, drawW, drawH);
+
+    // ===== Step2: 黒板を画面座標のまま描画（変換不要）=====
+    drawBBOnCanvas(scrCtx, SW, SH);
+
+    // ===== Step3: 出力解像度に変換 =====
+    const _rcOut = RES_CONFIG[S.resMode || 'cals1'];
+    let finalCanvas;
+
+    if(_rcOut.w){
+      // CALS系: 画面の向きに合わせた目標サイズ
+      const portrait = SH > SW;
+      const targetW  = portrait ? Math.min(_rcOut.w, _rcOut.h) : Math.max(_rcOut.w, _rcOut.h);
+      const targetH  = portrait ? Math.max(_rcOut.w, _rcOut.h) : Math.min(_rcOut.w, _rcOut.h);
+      finalCanvas = document.createElement('canvas');
+      finalCanvas.width  = targetW;
+      finalCanvas.height = targetH;
+      finalCanvas.getContext('2d').drawImage(scrCanvas, 0, 0, targetW, targetH);
+    } else {
+      // フル解像度: 画面サイズをそのまま使用
+      // ※ネイティブ高解像度が必要な場合はdevicePixelRatioを使う
+      const dpr = window.devicePixelRatio || 1;
+      finalCanvas = document.createElement('canvas');
+      finalCanvas.width  = SW * dpr;
+      finalCanvas.height = SH * dpr;
+      finalCanvas.getContext('2d').drawImage(scrCanvas, 0, 0, SW * dpr, SH * dpr);
+    }
+
+    const dataUrl=finalCanvas.toDataURL('image/jpeg',0.92);
+    const fname=buildFname();
+
+    addHist({ fileName:fname, location:S.location, workType:S.workType, status:S.status, seq:S.seq, capturedAt:new Date().toISOString() });
+    S.seq++; save(); refreshBlackboard();
+
+    document.getElementById('previewImg').src=dataUrl;
+    document.getElementById('previewFname').textContent=fname;
+    const hint=document.getElementById('saveHintMsg');
+    if(hint){ hint.textContent=''; }
+    stopClock();
+    showScreen('previewScreen');
+  }catch(e){
+    console.error(e); toast('撮影に失敗しました');
+  }finally{
+    btn.classList.remove('saving');
+  }
+}
+
+function drawBBOnCanvas(ctx, cw, ch){
+  // ===== 画面座標 = canvas座標 方式 =====
+  // capture()でcanvasを画面と同じcover方式で描いているため
+  // DOM要素の画面座標がそのままcanvas座標に対応する。
+  // あとは canvas/画面 の比率でスケールするだけ。
+
+  const SW = window.innerWidth;
+  const SH = window.innerHeight;
+  const sx = cw / SW;  // canvasx / 画面幅
+  const sy = ch / SH;  // canvasy / 画面高さ
+
+  function toC(r){
+    return { x: r.left*sx, y: r.top*sy, w: r.width*sx, h: r.height*sy };
+  }
+
+  const bbWrap  = document.getElementById('blackboard').querySelector('.bb-wrap');
+  const timeEl  = document.getElementById('bbTime');
+  const midEl   = bbWrap.querySelector('.bb-mid');
+  const dataRowEls = bbWrap.querySelectorAll('.bb-row:not(.no-bottom)');
+  const ctorRowEl  = bbWrap.querySelector('.bb-row.no-bottom');
+
+  const wc = toC(bbWrap.getBoundingClientRect());
+  // フォントサイズ = 黒板幅の約5%（Canvas座標系）
+  const fs = Math.max(10, wc.w * 0.055);
+  // キー幅の割合（CSS 54px / 220px ≈ 24.5%）
+  const KW_RATIO = 54 / 220;
+
+  ctx.save();
+  ctx.globalAlpha = 1.0;
+  ctx.textBaseline = 'middle';
+
+  // ── 背景緑 + 白枠 ──
+  ctx.fillStyle = '#2d6e2d';
+  rrect(ctx, wc.x, wc.y, wc.w, wc.h, 4*sx); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 2*sx;
+  rrect(ctx, wc.x, wc.y, wc.w, wc.h, 4*sx); ctx.stroke();
+
+  ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 2;
+
+  // ── データ行（工事件名・工事場所・工種）──
+  const dataLabels = ['工事件名','工事場所','工　　種'];
+  const dataVals   = [S.projectName||'—', S.location||'—', S.workType||'—'];
+
+  dataRowEls.forEach((rowEl, i)=>{
+    const rc = toC(rowEl.getBoundingClientRect());
+    const kw = rc.w * KW_RATIO;
+    const p  = rc.w * 0.025;
+
+    // キー背景
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillRect(rc.x, rc.y, kw, rc.h);
+    // 横線
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1*sx;
+    ctx.beginPath(); ctx.moveTo(rc.x, rc.y+rc.h); ctx.lineTo(rc.x+rc.w, rc.y+rc.h); ctx.stroke();
+    // 縦線
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.5*sx;
+    ctx.beginPath(); ctx.moveTo(rc.x+kw, rc.y); ctx.lineTo(rc.x+kw, rc.y+rc.h); ctx.stroke();
+
+    // キーテキスト（均等割付・クリップ）
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x, rc.y, kw, rc.h); ctx.clip();
+    ctx.font = `800 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    justifyText(ctx, dataLabels[i], rc.x+p, rc.y+rc.h/2, kw-p*2);
+    ctx.restore();
+
+    // 値テキスト（クリップ）
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x+kw, rc.y, rc.w-kw, rc.h); ctx.clip();
+    ctx.font = `600 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    fitText(ctx, dataVals[i], rc.x+kw+p, rc.y+rc.h/2, rc.w-kw-p*2);
+    ctx.restore();
+  });
+
+  // ── 中段（ステータスバッジ・中央配置）──
+  const mc = toC(midEl.getBoundingClientRect());
+  // 中段下の横線
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1*sx;
+  ctx.beginPath(); ctx.moveTo(mc.x, mc.y+mc.h); ctx.lineTo(mc.x+mc.w, mc.y+mc.h); ctx.stroke();
+
+  ctx.font = `800 ${fs*0.92}px -apple-system,sans-serif`;
+  const badgeTxt = S.status==='フリー' ? (S.freeStatusText||'フリーワード') : S.status;
+  const bm  = ctx.measureText(badgeTxt);
+  const bdgW = bm.width + 18*sx;
+  const bdgH = mc.h * 0.52;
+  const bdgX = mc.x + (mc.w - bdgW) / 2;   // 中央
+  const bdgY = mc.y + (mc.h - bdgH) / 2;
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  rrect(ctx, bdgX, bdgY, bdgW, bdgH, 10*sx); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 1.5*sx;
+  rrect(ctx, bdgX, bdgY, bdgW, bdgH, 10*sx); ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 2;
+  ctx.fillText(badgeTxt, bdgX + 9*sx, bdgY + bdgH/2);
+
+  // ── 施工者行 ──
+  if(ctorRowEl){
+    const rc = toC(ctorRowEl.getBoundingClientRect());
+    const kw = rc.w * KW_RATIO;
+    const p  = rc.w * 0.025;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillRect(rc.x, rc.y, kw, rc.h);
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.5*sx;
+    ctx.beginPath(); ctx.moveTo(rc.x+kw, rc.y); ctx.lineTo(rc.x+kw, rc.y+rc.h); ctx.stroke();
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x, rc.y, kw, rc.h); ctx.clip();
+    ctx.font = `800 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle';
+    justifyText(ctx, '施工者', rc.x+p, rc.y+rc.h/2, kw-p*2);
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x+kw, rc.y, rc.w-kw, rc.h); ctx.clip();
+    ctx.font = `600 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle';
+    fitText(ctx, S.contractor||'—', rc.x+kw+p, rc.y+rc.h/2, rc.w-kw-p*2);
+    ctx.restore();
+  }
+
+  // ── 日時（枠外・下） ──
+  const tl = timeLabel();
+  if(tl && timeEl && timeEl.style.display !== 'none'){
+    const tc = toC(timeEl.getBoundingClientRect());
+    ctx.font = `800 ${fs*0.9}px monospace`;
+    ctx.fillStyle = '#FFD700'; ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 4;
+    ctx.fillText(tl, tc.x + tc.w/2, tc.y + tc.h/2);
+    ctx.textAlign = 'left';
+  }
+
+  ctx.shadowBlur = 0;
+  ctx.restore();
+}
+
+// キーラベルを均等割付（スペースも位置計算に含め、非スペースのみ描画）
+function justifyText(ctx, text, x, y, w){
+  const chars = [...text];
+  if(chars.length <= 1){ ctx.fillText(text, x, y); return; }
+  const gap = w / (chars.length - 1);
+  chars.forEach((c, i)=>{
+    // 全角スペース（　）や半角スペースは位置だけ取って描画しない
+    if(c !== '　' && c !== ' '){
+      ctx.fillText(c, x + gap * i, y);
+    }
+  });
+}
+
+// 長いテキストをフォント縮小して1行に収める
+function fitText(ctx,text,x,y,maxW){
+  if(!text) return;
+  const orig=ctx.font;
+  if(ctx.measureText(text).width>maxW){
+    const fsm=orig.match(/([\d.]+)px/);
+    if(fsm){
+      const scale=maxW/ctx.measureText(text).width*0.95;
+      ctx.font=orig.replace(/([\d.]+)px/, (parseFloat(fsm[1])*scale).toFixed(1)+'px');
+    }
+  }
+  ctx.fillText(text,x,y);
+  ctx.font=orig;
+}
+
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+// ===== PREVIEW =====
+function saveToCamera(){
+  // 写真Appへの保存 - 画像を大きく表示して長押しを促す
+  const img = document.getElementById('previewImg');
+  img.style.cursor = 'pointer';
+  const hint = document.getElementById('saveHintMsg');
+  hint.textContent = '👆 上の写真を長押し →「写真を保存」をタップ';
+  hint.style.color = '#60a5fa';
+  // スクロールして写真を見やすくする
+  img.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function saveToFile(){
+  const img = document.getElementById('previewImg');
+  const fname = document.getElementById('previewFname').textContent || 'photo.jpg';
+  if(!img.src || img.src==='') return;
+  try{
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    const hint = document.getElementById('saveHintMsg');
+    hint.textContent = '✅ ダウンロード開始！ファイルAppを確認してください';
+    hint.style.color = '#4ade80';
+  }catch(e){
+    const hint = document.getElementById('saveHintMsg');
+    hint.textContent = '⚠ 保存に失敗しました: '+e.message;
+    hint.style.color = '#f87171';
+  }
+}
+function continueCapture(){
+  showScreen('cameraScreen');
+  if(stream){
+    const vid=document.getElementById('videoEl');
+    vid.srcObject=stream; vid.play().catch(()=>{});
+  } else { startCamera(); return; }
+  refreshBlackboard(); startClock();
+}
+function goHome(){ stopStream(); stopClock(); showScreen('homeScreen'); refreshHome(); }
+
+// ===== HISTORY =====
+function showHistory(){
+  const h=getHist();
+  const list=document.getElementById('histList');
+  const count=document.getElementById('histCount');
+  if(!h.length){
+    if(count) count.textContent='';
+    list.innerHTML='<div class="hist-empty">📷 まだ撮影履歴がありません</div>';
+  } else {
+    if(count) count.textContent=`${h.length}件`;
+    list.innerHTML=h.map((item,idx)=>{
+      const c=SC[item.status]||'#666';
+      const dt=new Date(item.capturedAt).toLocaleString('ja-JP');
+      const label=item.status==='フリー'?(item.freeStatusText||'フリー'):item.status;
+      return `<div class="hist-item" id="hist-item-${idx}">
+        <div class="hist-dot" style="background:${c}"></div>
+        <div class="hist-info">
+          <div class="hist-fname">${item.fileName}</div>
+          <div class="hist-meta">${item.location} / ${item.workType} — ${dt}</div>
+        </div>
+        <div class="hist-badge" style="background:${c};margin-right:6px">${label}</div>
+        <button class="hist-del-btn" onclick="deleteHistItem(${idx})">削除</button>
+      </div>`;
+    }).join('');
+  }
+  showScreen('historyScreen');
+}
+function deleteHistItem(idx){
+  const h=getHist();
+  const item=h[idx];
+  if(!confirm(`この履歴を削除しますか？\n\n📁 ${item.fileName}`)) return;
+  h.splice(idx,1);
+  try{ localStorage.setItem('kjs_h',JSON.stringify(h)); }catch(e){}
+  showHistory();
+}
+function clearHistory(){
+  const h=getHist();
+  if(!h.length){ alert('削除する履歴がありません。'); return; }
+  if(!confirm(`撮影履歴を全${h.length}件まとめて削除しますか？\nこの操作は元に戻せません。`)) return;
+  localStorage.removeItem('kjs_h');
+  showHistory();
+}
+
+// ===== README =====
+function showReadme(){ showScreen('readmeScreen'); }
+
+// ===== INIT =====
+load(); refreshHome();
+</script>
+
+</body>
+</html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
