@@ -158,6 +158,20 @@ text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
 /* ===== CAMERA ===== */
+/* ===== 4:3 撮影ガイド枠 ===== */
+#cropGuide{
+position:fixed; z-index:5; pointer-events:none;
+/* JS で top/left/width/height をセット */
+box-sizing:border-box;
+border:2px solid rgba(255,255,255,0.85);
+border-radius:2px;
+}
+/* 枠外を暗くするオーバーレイ（上下左右の4枚） */
+.crop-shade{
+position:fixed; z-index:4; pointer-events:none;
+background:rgba(0,0,0,0.45);
+}
+
 #cameraScreen{ background:#000; overflow:hidden; }
 #videoWrap{
 position:fixed; top:0;left:0;right:0;bottom:0;
@@ -464,6 +478,13 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 <body>
 
 <div class="flash-overlay" id="flashOverlay"></div>
+<!-- 4:3 撮影ガイド枠 -->
+<div id="cropGuide"></div>
+<div class="crop-shade" id="shadeTop"></div>
+<div class="crop-shade" id="shadeBottom"></div>
+<div class="crop-shade" id="shadeLeft"></div>
+<div class="crop-shade" id="shadeRight"></div>
+
 <div class="toast" id="toast"></div>
 
 <!-- ===== HOME ===== -->
@@ -474,7 +495,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v33</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v35</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -703,7 +724,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v33</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v35</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1031,6 +1052,7 @@ function stopCamera(){ stopStream(); stopClock(); showScreen('homeScreen'); refr
 function stopStream(){
   if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
   document.getElementById('videoEl').srcObject=null;
+  hideCropGuide();
 }
 function startClock(){ stopClock(); clockTimer=setInterval(tickClock,1000); tickClock(); }
 function stopClock(){ if(clockTimer){ clearInterval(clockTimer); clockTimer=null; } }
@@ -1082,6 +1104,59 @@ async function flipCamera(){
   }catch(e){ toast('カメラ切替失敗'); }
 }
 
+
+// ===== 4:3 撮影ガイド枠を更新 =====
+function updateCropGuide(){
+  const guide = document.getElementById('cropGuide');
+  if(!guide) return;
+  const SW = window.innerWidth;
+  const SH = window.innerHeight;
+  // 4:3 枠のサイズを計算（画面に収まる最大サイズ）
+  let gw, gh;
+  if(SW / SH > 4/3){
+    // 画面が横長: 高さ基準
+    gh = SH;
+    gw = gh * 4/3;
+  } else {
+    // 画面が縦長: 幅基準
+    gw = SW;
+    gh = gw * 3/4;
+  }
+  const gx = (SW - gw) / 2;
+  const gy = (SH - gh) / 2;
+
+  guide.style.left   = gx + 'px';
+  guide.style.top    = gy + 'px';
+  guide.style.width  = gw + 'px';
+  guide.style.height = gh + 'px';
+
+  // 4枚のシェード
+  const st = document.getElementById('shadeTop');
+  const sb = document.getElementById('shadeBottom');
+  const sl = document.getElementById('shadeLeft');
+  const sr = document.getElementById('shadeRight');
+  if(st){
+    st.style.cssText = `left:0;top:0;width:${SW}px;height:${gy}px;`;
+    sb.style.cssText = `left:0;top:${gy+gh}px;width:${SW}px;height:${SH-gy-gh}px;`;
+    sl.style.cssText = `left:0;top:${gy}px;width:${gx}px;height:${gh}px;`;
+    sr.style.cssText = `left:${gx+gw}px;top:${gy}px;width:${SW-gx-gw}px;height:${gh}px;`;
+  }
+}
+
+// ガイド枠の表示/非表示
+function showCropGuide(){ 
+  ['cropGuide','shadeTop','shadeBottom','shadeLeft','shadeRight'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = '';
+  });
+  updateCropGuide();
+}
+function hideCropGuide(){
+  ['cropGuide','shadeTop','shadeBottom','shadeLeft','shadeRight'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+}
 // ===== 黒板ドラッグ =====
 function initBBPosition(){
   const bb=document.getElementById('blackboard');
@@ -1212,29 +1287,38 @@ async function capture(){
     const vid = document.getElementById('videoEl');
     const vw = vid.videoWidth  || 1280;
     const vh = vid.videoHeight || 720;
-    const SW = window.innerWidth;   // 画面幅
-    const SH = window.innerHeight;  // 画面高さ
+    const SW = window.innerWidth;
+    const SH = window.innerHeight;
 
-    // ===== Step1: 画面と同じサイズのcanvasにcover描画 =====
-    // CSS object-fit:cover と全く同じ計算でビデオを描く
-    // → 画面座標 = canvas座標 が成立する
+    // ===== 画面に見えている範囲をビデオフレームから正確に切り出す =====
+    //
+    // object-fit:cover の仕組み:
+    //   coverScale = max(SW/vw, SH/vh)  ← 画面をぴったり埋める最小倍率
+    //   画面に見えているビデオの幅 = SW / coverScale (ビデオピクセル単位)
+    //   画面に見えているビデオの高さ = SH / coverScale
+    //   左端のクロップ量 = (vw - visibleW) / 2
+    //   上端のクロップ量 = (vh - visibleH) / 2
+    //
+    // drawImage 9引数: drawImage(vid, sx,sy,sw,sh, dx,dy,dw,dh)
+    //   sx,sy,sw,sh = ビデオフレームの切り出し範囲（ビデオピクセル）
+    //   dx,dy,dw,dh = canvas上の描画先（canvasピクセル）
+    // → 「画面で見えている範囲だけ」を「canvas全体」に描くことで画角が一致する
+
+    const coverScale = Math.max(SW / vw, SH / vh);
+    const visibleW = SW / coverScale;   // 画面に見えているビデオ幅（ビデオpx）
+    const visibleH = SH / coverScale;   // 画面に見えているビデオ高さ（ビデオpx）
+    const cropX = (vw - visibleW) / 2;  // 左端クロップ量
+    const cropY = (vh - visibleH) / 2;  // 上端クロップ量
+
+    // ===== Step1: 画面サイズのcanvasに「見えている範囲だけ」を描画 =====
     const scrCanvas = document.createElement('canvas');
     scrCanvas.width  = SW;
     scrCanvas.height = SH;
     const scrCtx = scrCanvas.getContext('2d');
+    // 9引数drawImage: ビデオの切り出し範囲 → canvas全体
+    scrCtx.drawImage(vid, cropX, cropY, visibleW, visibleH, 0, 0, SW, SH);
 
-    // cover スケール: 画面をビデオで埋める最小スケール
-    const scaleX = SW / vw;
-    const scaleY = SH / vh;
-    const coverScale = Math.max(scaleX, scaleY);
-    // ビデオを画面に貼る位置（中央配置、はみ出し可）
-    const drawW = vw * coverScale;
-    const drawH = vh * coverScale;
-    const drawX = (SW - drawW) / 2;
-    const drawY = (SH - drawH) / 2;
-    scrCtx.drawImage(vid, drawX, drawY, drawW, drawH);
-
-    // ===== Step2: 黒板を画面座標のまま描画（変換不要）=====
+    // ===== Step2: 黒板を画面座標のまま描画 =====
     drawBBOnCanvas(scrCtx, SW, SH);
 
     // ===== Step3: 出力解像度に変換 =====
@@ -1242,17 +1326,15 @@ async function capture(){
     let finalCanvas;
 
     if(_rcOut.w){
-      // CALS系: 画面の向きに合わせた目標サイズ
       const portrait = SH > SW;
-      const targetW  = portrait ? Math.min(_rcOut.w, _rcOut.h) : Math.max(_rcOut.w, _rcOut.h);
-      const targetH  = portrait ? Math.max(_rcOut.w, _rcOut.h) : Math.min(_rcOut.w, _rcOut.h);
+      const targetW = portrait ? Math.min(_rcOut.w, _rcOut.h) : Math.max(_rcOut.w, _rcOut.h);
+      const targetH = portrait ? Math.max(_rcOut.w, _rcOut.h) : Math.min(_rcOut.w, _rcOut.h);
       finalCanvas = document.createElement('canvas');
       finalCanvas.width  = targetW;
       finalCanvas.height = targetH;
       finalCanvas.getContext('2d').drawImage(scrCanvas, 0, 0, targetW, targetH);
     } else {
-      // フル解像度: 画面サイズをそのまま使用
-      // ※ネイティブ高解像度が必要な場合はdevicePixelRatioを使う
+      // フル: devicePixelRatio倍（ネイティブ解像度）
       const dpr = window.devicePixelRatio || 1;
       finalCanvas = document.createElement('canvas');
       finalCanvas.width  = SW * dpr;
