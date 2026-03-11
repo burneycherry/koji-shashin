@@ -475,7 +475,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v25</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v26</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -704,7 +704,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v25</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v26</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1273,128 +1273,140 @@ async function capture(){
   }
 }
 
-function drawBBOnCanvas(ctx,cw,ch){
-  // bb-wrap = 枠あり領域、bb-time-row = 枠外の日時
-  const bbWrap = document.getElementById('blackboard').querySelector('.bb-wrap');
-  const timeEl = document.getElementById('bbTime');
-  const vR=document.getElementById('videoWrap').getBoundingClientRect();
-  const wR=bbWrap.getBoundingClientRect();
-  const sx=cw/vR.width, sy=ch/vR.height;
-  const bx=(wR.left-vR.left)*sx, by=(wR.top-vR.top)*sy;
-  const bw=wR.width*sx, bh=wR.height*sy;
+function drawBBOnCanvas(ctx, cw, ch){
+  // ===== 各DOM要素の実際の画面位置を直接測定して描画 =====
+  // getBoundingClientRect はscale/解像度変更後の実際の視覚的位置を返す
+  // これにより解像度・ピンチスケール変更後も正確に描画できる
 
-  ctx.save();
+  const vR = document.getElementById('videoWrap').getBoundingClientRect();
+  const sx = cw / vR.width;
+  const sy = ch / vR.height;
 
-  // 枠内: 背景緑 + 白枠
-  ctx.globalAlpha=1.0;
-  ctx.fillStyle='#2d6e2d';
-  rrect(ctx,bx,by,bw,bh,4*sx); ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=2*sx;
-  rrect(ctx,bx,by,bw,bh,4*sx); ctx.stroke();
-
-  const fs=Math.max(11,11*sx);
-  const lh=Math.max(30,bh/5.2);  // 5行均等（4:3ベース）
-  const kw=56*sx, p=6*sx;
-
-  ctx.textBaseline='middle';
-  ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=2;
-
-  const rows=[
-    ['工事件名', S.projectName||'—'],
-    ['工事場所', S.location||'—'],
-    ['工　　種', S.workType||'—'],
-  ];
-
-  let y=by;
-
-  rows.forEach(([k,v])=>{
-    // キー背景
-    ctx.fillStyle='rgba(0,0,0,0.22)';
-    ctx.fillRect(bx, y, kw, lh);
-    // 横仕切り線
-    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=1*sx;
-    ctx.beginPath(); ctx.moveTo(bx, y+lh); ctx.lineTo(bx+bw, y+lh); ctx.stroke();
-    // 縦仕切り線（太めにしてはっきり見えるよう）
-    ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=1.5*sx;
-    ctx.beginPath(); ctx.moveTo(bx+kw, y); ctx.lineTo(bx+kw, y+lh); ctx.stroke();
-
-    // キーテキスト（クリップしてはみ出し防止）
-    ctx.save();
-    ctx.beginPath(); ctx.rect(bx, y, kw, lh); ctx.clip();
-    ctx.font = `800 ${fs}px -apple-system,sans-serif`;
-    ctx.fillStyle = '#ffffff';
-    justifyText(ctx, k, bx+5*sx, y+lh/2, kw-10*sx);
-    ctx.restore();
-
-    // 値テキスト（クリップしてはみ出し防止）
-    ctx.save();
-    ctx.beginPath(); ctx.rect(bx+kw+1, y, bw-kw-1, lh); ctx.clip();
-    ctx.font = `600 ${fs}px -apple-system,sans-serif`;
-    ctx.fillStyle = '#ffffff';
-    fitText(ctx, v, bx+kw+p, y+lh/2, bw-kw-p*2);
-    ctx.restore();
-
-    y += lh;
-  });
-
-  // 中段
-  const midH=Math.max(36,bh*0.24);  // 中段は全体の約24%
-  ctx.shadowBlur=0;
-  ctx.strokeStyle='rgba(255,255,255,0.65)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(bx,y+midH); ctx.lineTo(bx+bw,y+midH); ctx.stroke();
-
-  ctx.font=`800 ${fs*0.9}px -apple-system,sans-serif`;
-  const badgeTxt=S.status==='フリー'?(S.freeStatusText||'フリーワード'):S.status;
-  const bm=ctx.measureText(badgeTxt);
-  const bdgW=bm.width+16*sx, bdgH=20*sy;
-  // バッジを中央配置
-  const bdgX = bx + (bw - bdgW)/2;
-  const bdgY = y + (midH - bdgH)/2;
-  ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.shadowBlur=0;
-  rrect(ctx,bdgX,bdgY,bdgW,bdgH,10*sx); ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=1.5;
-  rrect(ctx,bdgX,bdgY,bdgW,bdgH,10*sx); ctx.stroke();
-  ctx.fillStyle='#ffffff'; ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=2;
-  ctx.fillText(badgeTxt, bdgX+8*sx, bdgY+bdgH/2);
-
-  // フリーステータスのテキストはバッジで表示済みのため中段テキスト描画なし
-  y+=midH;
-
-  // 施工業者
-  ctx.fillStyle='rgba(0,0,0,0.22)';
-  ctx.fillRect(bx, y, kw, lh);
-  ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=1.5*sx;
-  ctx.beginPath(); ctx.moveTo(bx+kw, y); ctx.lineTo(bx+kw, y+lh); ctx.stroke();
-  // キーテキスト（クリップ）
-  ctx.save();
-  ctx.beginPath(); ctx.rect(bx, y, kw, lh); ctx.clip();
-  ctx.font = `800 ${fs}px -apple-system,sans-serif`;
-  ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle';
-  justifyText(ctx, '施工者', bx+5*sx, y+lh/2, kw-10*sx);
-  ctx.restore();
-  // 値テキスト（クリップ）
-  ctx.save();
-  ctx.beginPath(); ctx.rect(bx+kw+1, y, bw-kw-1, lh); ctx.clip();
-  ctx.font = `600 ${fs}px -apple-system,sans-serif`;
-  ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle';
-  fitText(ctx, S.contractor||'—', bx+kw+p, y+lh/2, bw-kw-p*2);
-  ctx.restore();
-  y += lh;
-
-  // 日時: 枠の外・bb-wrap下端から少し下に描画
-  const tl = timeLabel();
-  if(tl && timeEl && timeEl.style.display !== 'none'){
-    const tR = timeEl.getBoundingClientRect();
-    const ty = (tR.top - vR.top) * sy;
-    const th = tR.height * sy;
-    ctx.font=`800 ${fs*0.95}px monospace`;
-    ctx.fillStyle='#FFD700'; ctx.textAlign='center';
-    ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=4;
-    ctx.fillText(tl, bx+bw/2, ty + th/2);
-    ctx.textAlign='left';
+  // 画面座標→Canvas座標の変換ヘルパー
+  function toC(r){
+    return { x:(r.left-vR.left)*sx, y:(r.top-vR.top)*sy, w:r.width*sx, h:r.height*sy };
   }
 
-  ctx.shadowBlur=0;
+  const bbWrap  = document.getElementById('blackboard').querySelector('.bb-wrap');
+  const timeEl  = document.getElementById('bbTime');
+  const midEl   = bbWrap.querySelector('.bb-mid');
+  const dataRowEls = bbWrap.querySelectorAll('.bb-row:not(.no-bottom)');
+  const ctorRowEl  = bbWrap.querySelector('.bb-row.no-bottom');
+
+  const wc = toC(bbWrap.getBoundingClientRect());
+  // フォントサイズ = 黒板幅の約5%（Canvas座標系）
+  const fs = Math.max(10, wc.w * 0.055);
+  // キー幅の割合（CSS 54px / 220px ≈ 24.5%）
+  const KW_RATIO = 54 / 220;
+
+  ctx.save();
+  ctx.globalAlpha = 1.0;
+  ctx.textBaseline = 'middle';
+
+  // ── 背景緑 + 白枠 ──
+  ctx.fillStyle = '#2d6e2d';
+  rrect(ctx, wc.x, wc.y, wc.w, wc.h, 4*sx); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 2*sx;
+  rrect(ctx, wc.x, wc.y, wc.w, wc.h, 4*sx); ctx.stroke();
+
+  ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 2;
+
+  // ── データ行（工事件名・工事場所・工種）──
+  const dataLabels = ['工事件名','工事場所','工　　種'];
+  const dataVals   = [S.projectName||'—', S.location||'—', S.workType||'—'];
+
+  dataRowEls.forEach((rowEl, i)=>{
+    const rc = toC(rowEl.getBoundingClientRect());
+    const kw = rc.w * KW_RATIO;
+    const p  = rc.w * 0.025;
+
+    // キー背景
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillRect(rc.x, rc.y, kw, rc.h);
+    // 横線
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1*sx;
+    ctx.beginPath(); ctx.moveTo(rc.x, rc.y+rc.h); ctx.lineTo(rc.x+rc.w, rc.y+rc.h); ctx.stroke();
+    // 縦線
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.5*sx;
+    ctx.beginPath(); ctx.moveTo(rc.x+kw, rc.y); ctx.lineTo(rc.x+kw, rc.y+rc.h); ctx.stroke();
+
+    // キーテキスト（均等割付・クリップ）
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x, rc.y, kw, rc.h); ctx.clip();
+    ctx.font = `800 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    justifyText(ctx, dataLabels[i], rc.x+p, rc.y+rc.h/2, kw-p*2);
+    ctx.restore();
+
+    // 値テキスト（クリップ）
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x+kw, rc.y, rc.w-kw, rc.h); ctx.clip();
+    ctx.font = `600 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    fitText(ctx, dataVals[i], rc.x+kw+p, rc.y+rc.h/2, rc.w-kw-p*2);
+    ctx.restore();
+  });
+
+  // ── 中段（ステータスバッジ・中央配置）──
+  const mc = toC(midEl.getBoundingClientRect());
+  // 中段下の横線
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1*sx;
+  ctx.beginPath(); ctx.moveTo(mc.x, mc.y+mc.h); ctx.lineTo(mc.x+mc.w, mc.y+mc.h); ctx.stroke();
+
+  ctx.font = `800 ${fs*0.92}px -apple-system,sans-serif`;
+  const badgeTxt = S.status==='フリー' ? (S.freeStatusText||'フリーワード') : S.status;
+  const bm  = ctx.measureText(badgeTxt);
+  const bdgW = bm.width + 18*sx;
+  const bdgH = mc.h * 0.52;
+  const bdgX = mc.x + (mc.w - bdgW) / 2;   // 中央
+  const bdgY = mc.y + (mc.h - bdgH) / 2;
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  rrect(ctx, bdgX, bdgY, bdgW, bdgH, 10*sx); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 1.5*sx;
+  rrect(ctx, bdgX, bdgY, bdgW, bdgH, 10*sx); ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 2;
+  ctx.fillText(badgeTxt, bdgX + 9*sx, bdgY + bdgH/2);
+
+  // ── 施工者行 ──
+  if(ctorRowEl){
+    const rc = toC(ctorRowEl.getBoundingClientRect());
+    const kw = rc.w * KW_RATIO;
+    const p  = rc.w * 0.025;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillRect(rc.x, rc.y, kw, rc.h);
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.5*sx;
+    ctx.beginPath(); ctx.moveTo(rc.x+kw, rc.y); ctx.lineTo(rc.x+kw, rc.y+rc.h); ctx.stroke();
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x, rc.y, kw, rc.h); ctx.clip();
+    ctx.font = `800 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle';
+    justifyText(ctx, '施工者', rc.x+p, rc.y+rc.h/2, kw-p*2);
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rc.x+kw, rc.y, rc.w-kw, rc.h); ctx.clip();
+    ctx.font = `600 ${fs}px -apple-system,sans-serif`;
+    ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle';
+    fitText(ctx, S.contractor||'—', rc.x+kw+p, rc.y+rc.h/2, rc.w-kw-p*2);
+    ctx.restore();
+  }
+
+  // ── 日時（枠外・下） ──
+  const tl = timeLabel();
+  if(tl && timeEl && timeEl.style.display !== 'none'){
+    const tc = toC(timeEl.getBoundingClientRect());
+    ctx.font = `800 ${fs*0.9}px monospace`;
+    ctx.fillStyle = '#FFD700'; ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 4;
+    ctx.fillText(tl, tc.x + tc.w/2, tc.y + tc.h/2);
+    ctx.textAlign = 'left';
+  }
+
+  ctx.shadowBlur = 0;
   ctx.restore();
 }
 
