@@ -512,7 +512,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v50</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v51</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -742,7 +742,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v50</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v51</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1141,29 +1141,20 @@ function updateCropGuide(){
   if(!guide) return;
   const SW = window.innerWidth;
   const SH = window.innerHeight;
-
-  // ボトムバーの実際の高さを取得（safe-area含む）
-  const bar = document.querySelector('.cam-bottombar');
-  const barH = bar ? bar.offsetHeight : 120;
-  // 有効エリア: 上部に少し余白、下部はボトムバーを除く
-  const topPad = 8;
-  const AW = SW;               // 有効幅
-  const AH = SH - barH - topPad; // 有効高さ
-
+  // 撮影枠のサイズを計算（画面に収まる最大サイズ）
   // 横持ち → 横長4:3、縦持ち → 縦長3:4
   let gw, gh;
   if(SW >= SH){
-    // 横持ち: 横長4:3
-    if(AW / AH > 4/3){ gh = AH; gw = gh * 4/3; }
-    else              { gw = AW; gh = gw * 3/4; }
+    // 横持ち: 横長4:3（幅優先）
+    if(SW / SH > 4/3){ gh = SH; gw = gh * 4/3; }
+    else              { gw = SW; gh = gw * 3/4; }
   } else {
-    // 縦持ち: 縦長3:4
-    if(AH / AW > 4/3){ gw = AW; gh = gw * 4/3; }
-    else              { gh = AH; gw = gh * 3/4; }
+    // 縦持ち: 縦長3:4（幅優先）
+    if(SH / SW > 4/3){ gw = SW; gh = gw * 4/3; }
+    else              { gh = SH; gw = gh * 3/4; }
   }
-  // 有効エリア内で中央配置（縦は上寄り気味）
   const gx = (SW - gw) / 2;
-  const gy = topPad + (AH - gh) / 2;
+  const gy = (SH - gh) / 2;
 
   guide.style.left   = gx + 'px';
   guide.style.top    = gy + 'px';
@@ -1246,13 +1237,9 @@ function initBBPosition(){
     // ガイド枠内に制限（bbTimeの高さ分も含める）
     const SW = window.innerWidth, SH = window.innerHeight;
     let gx, gy, gw, gh;
-    const _bar2 = document.querySelector('.cam-bottombar');
-    const _barH2 = _bar2 ? _bar2.offsetHeight : 120;
-    const _topPad2 = 8;
-    const _AW = SW, _AH = SH - _barH2 - _topPad2;
-    if(SW>=SH){ if(_AW/_AH>4/3){gh=_AH;gw=gh*4/3;}else{gw=_AW;gh=gw*3/4;} }
-    else{ if(_AH/_AW>4/3){gw=_AW;gh=gw*4/3;}else{gh=_AH;gw=gh*3/4;} }
-    gx=(SW-gw)/2; gy=_topPad2+(_AH-gh)/2;
+    if(SW>=SH){ if(SW/SH>4/3){gh=SH;gw=gh*4/3;}else{gw=SW;gh=gw*3/4;} }
+    else{ if(SH/SW>4/3){gw=SW;gh=gw*4/3;}else{gh=SH;gw=gh*3/4;} }
+    gx=(SW-gw)/2; gy=(SH-gh)/2;
     // bb全体（bb-wrap + bbTime）の高さを考慮
     const bbTimeEl = document.getElementById('bbTime');
     const timeH = bbTimeEl ? bbTimeEl.offsetHeight * bbScale + 4 : 0;
@@ -1430,13 +1417,9 @@ function drawBBOnCanvas(ctx, cw, ch, guide){
   let gx, gy, gw, gh;
   if(guide){ gx=guide.x; gy=guide.y; gw=guide.w; gh=guide.h; }
   else {
-    const _bar2 = document.querySelector('.cam-bottombar');
-    const _barH2 = _bar2 ? _bar2.offsetHeight : 120;
-    const _topPad2 = 8;
-    const _AW = SW, _AH = SH - _barH2 - _topPad2;
-    if(SW>=SH){ if(_AW/_AH>4/3){gh=_AH;gw=gh*4/3;}else{gw=_AW;gh=gw*3/4;} }
-    else{ if(_AH/_AW>4/3){gw=_AW;gh=gw*4/3;}else{gh=_AH;gw=gh*3/4;} }
-    gx=(SW-gw)/2; gy=_topPad2+(_AH-gh)/2;
+    if(SW>=SH){ if(SW/SH>4/3){gh=SH;gw=gh*4/3;}else{gw=SW;gh=gw*3/4;} }
+    else{ if(SH/SW>4/3){gw=SW;gh=gw*4/3;}else{gh=SH;gw=gh*3/4;} }
+    gx=(SW-gw)/2; gy=(SH-gh)/2;
   }
   const sx = cw / gw;
   const sy = ch / gh;
