@@ -495,11 +495,11 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 
 <div class="flash-overlay" id="flashOverlay"></div>
 <!-- 4:3 撮影ガイド枠 -->
-<div id="cropGuide"><div id="cropGuideLabel" style="position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#FFD700;font-size:11px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.9);letter-spacing:0.5px;pointer-events:none;">📷 撮影範囲</div></div>
-<div class="crop-shade" id="shadeTop"></div>
-<div class="crop-shade" id="shadeBottom"></div>
-<div class="crop-shade" id="shadeLeft"></div>
-<div class="crop-shade" id="shadeRight"></div>
+<div id="cropGuide" style="display:none"><div id="cropGuideLabel" style="position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#FFD700;font-size:11px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,0.9);letter-spacing:0.5px;pointer-events:none;">📷 撮影範囲</div></div>
+<div class="crop-shade" id="shadeTop" style="display:none"></div>
+<div class="crop-shade" id="shadeBottom" style="display:none"></div>
+<div class="crop-shade" id="shadeLeft" style="display:none"></div>
+<div class="crop-shade" id="shadeRight" style="display:none"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -511,7 +511,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v40</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v41</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -740,7 +740,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v40</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v41</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1124,7 +1124,7 @@ async function flipCamera(){
 // ===== 4:3 撮影ガイド枠を更新 =====
 function updateCropGuide(){
   const guide = document.getElementById('cropGuide');
-  if(!guide) return;
+  if(!guide || guide.style.display === 'none') return;
   const SW = window.innerWidth;
   const SH = window.innerHeight;
   // 4:3 枠のサイズを計算（画面に収まる最大サイズ）
