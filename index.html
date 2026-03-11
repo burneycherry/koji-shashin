@@ -261,15 +261,18 @@ display:flex; flex-direction:column; gap:4px;
 justify-content:center; align-items:center;
 }
 .bb-status-badge{
-font-size:16.5px; font-weight:800; color:#ffffff;
+font-weight:800; color:#ffffff;
 text-align:center;
+white-space:pre-wrap;
 text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+display:flex; flex-direction:column; align-items:center; justify-content:center;
+height:100%;
 }
 .bb-free{
-font-size:11px; color:#ffffff;
-font-weight:600;
-line-height:1.5; white-space:pre-wrap;
+color:#ffffff; font-weight:600;
+line-height:1.4; white-space:pre-wrap;
 text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+text-align:center;
 }
 
 /* 撮影日時行 — 黒板枠の外・下 */
@@ -511,7 +514,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v43</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v45</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -547,11 +550,12 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     <button class="status-opt" data-val="フリー" onclick="selectStatus(this)">フリー</button>
   </div>
   <div id="freeStatusWrap" style="display:none;margin-top:10px;">
-    <input type="text" id="freeStatusInput" placeholder="例：絶縁測定・試運転 など"
+    <textarea id="freeStatusInput" placeholder="例：絶縁測定&#10;試運転など（複数行OK）" rows="5"
       style="width:100%;background:#0f2a0f;border:2px solid #FFD700;border-radius:10px;
              padding:11px 14px;font-size:15px;font-family:inherit;color:#FFD700;
-             outline:none;-webkit-appearance:none;"
-      oninput="onFreeStatusInput(this.value)">
+             outline:none;-webkit-appearance:none;resize:none;box-sizing:border-box;
+             line-height:1.6;"
+      oninput="onFreeStatusInput(this.value)"></textarea>
   </div>
 </div>
 
@@ -740,7 +744,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v43</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v45</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1079,9 +1083,20 @@ function refreshBlackboard(){
   const badge=document.getElementById('bbBadge');
   // バッジは常にチョーク白・フリーはフリーワード表示
   if(S.status==='フリー'){
-    badge.textContent = S.freeStatusText || 'フリーワード';
+    const _ft = S.freeStatusText || 'フリーワード';
+    badge.textContent = _ft;
+    badge.style.whiteSpace = 'pre-wrap';
+    // 行数に応じてフォントサイズ自動調整（bb-midの高さ基準）
+    const _midEl = badge.closest('.bb-mid') || badge.parentElement;
+    const _midH = _midEl ? _midEl.offsetHeight : 82;
+    const _lines = _ft.split('\n').filter(l=>l.trim()).length || 1;
+    const _fs = Math.min(16.5, Math.max(9, (_midH * 0.62) / _lines));
+    badge.style.fontSize = _fs + 'px';
+    badge.style.lineHeight = '1.35';
   } else {
     badge.textContent = S.status;
+    badge.style.fontSize = '16.5px';
+    badge.style.lineHeight = '';
   }
   badge.style.background = 'rgba(255,255,255,0.12)';
   badge.style.borderColor = 'rgba(255,255,255,0.7)';
@@ -1092,7 +1107,7 @@ function refreshBlackboard(){
   document.getElementById('bbWorkType').textContent  = S.workType||'—';
   document.getElementById('bbContractor').textContent= S.contractor||'—';
   document.getElementById('bbFree').textContent      = '';  // フリーステータスのテキストはバッジで表示
-  document.getElementById('statusLabel').textContent = S.status==='フリー' ? (S.freeStatusText||'フリーワード').slice(0,6) : S.status;
+  document.getElementById('statusLabel').textContent = S.status==='フリー' ? (S.freeStatusText||'フリーワード').split('\n')[0].slice(0,8) : S.status;
   document.getElementById('camSeqNum').textContent   = pad(S.seq);
   refreshTimeMode();
 }
@@ -1484,13 +1499,21 @@ function drawBBOnCanvas(ctx, cw, ch, guide){
   ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1*sx;
   ctx.beginPath(); ctx.moveTo(mc.x, mc.y+mc.h); ctx.lineTo(mc.x+mc.w, mc.y+mc.h); ctx.stroke();
 
-  ctx.font = `800 ${fs*1.38}px -apple-system,sans-serif`;
   const badgeTxt = S.status==='フリー' ? (S.freeStatusText||'フリーワード') : S.status;
-  // 枠なし・白文字のみ・中央配置
+  const lines = badgeTxt.split('\n').filter(l => l.trim() !== '');
+  // 行数に応じてフォントサイズ自動縮小（エリア高さに収まるよう）
+  const maxFsForLines = Math.min(fs*1.38, (mc.h * 0.62) / lines.length);
+  const badgeFs = Math.max(fs*0.7, maxFsForLines);
+  ctx.font = `800 ${badgeFs}px -apple-system,sans-serif`;
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
   ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 2;
-  ctx.fillText(badgeTxt, mc.x + mc.w/2, mc.y + mc.h/2);
+  const lineH = badgeFs * 1.35;
+  const totalH = lines.length * lineH;
+  const startY = mc.y + mc.h/2 - totalH/2 + lineH/2;
+  lines.forEach((line, i) => {
+    ctx.fillText(line, mc.x + mc.w/2, startY + i * lineH);
+  });
   ctx.textAlign = 'left';
 
   // ── 施工者行 ──
