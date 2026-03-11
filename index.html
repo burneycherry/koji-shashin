@@ -475,7 +475,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v27</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v28</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -704,7 +704,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v27</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v28</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1274,49 +1274,25 @@ async function capture(){
 }
 
 function drawBBOnCanvas(ctx, cw, ch){
-  // ===== ビデオの「実際の表示領域」を正確に計算 =====
-  // video要素は object-fit:cover で表示されるため、
-  // videoWrap のサイズ ≠ ビデオコンテンツの表示エリア。
-  // canvas描画(drawImage)は videoWidth×videoHeight 全体を描くので
-  // 「画面上でビデオコンテンツが実際に見えている矩形」を基準にする必要がある。
+  // ===== 座標変換: videoEl自体のBoundingClientRectを基準にする =====
+  // video要素は translate(-50%,-50%) でセンタリングされており、
+  // getBoundingClientRect() はこのtransformを含む実際の視覚的位置を返す。
+  // drawImage(vid, 0, 0, cw, ch) はビデオフレーム全体をcanvasに描くので、
+  // 「videoEl表示左上 → canvas左上」「videoEl表示右下 → canvas右下」
+  // という1:1の対応になる。これを使って DOM要素位置をcanvas座標に変換する。
 
-  const vid = document.getElementById('videoEl');
-  const wrap = document.getElementById('videoWrap');
-  const wR = wrap.getBoundingClientRect();
+  const vid   = document.getElementById('videoEl');
+  const vidR  = vid.getBoundingClientRect(); // videoEl の実際の画面上の rect
 
-  const vw = vid.videoWidth  || cw;
-  const vh = vid.videoHeight || ch;
-  const containerAR = wR.width / wR.height;
-  const videoAR     = vw / vh;
-
-  // object-fit:cover の表示計算
-  let dispW, dispH, offX, offY;
-  if(videoAR > containerAR){
-    // ビデオが横長 → 高さ基準でフィット、左右がはみ出す
-    dispH = wR.height;
-    dispW = wR.height * videoAR;
-    offX  = (wR.width - dispW) / 2;   // 負の値（左右クロップ）
-    offY  = 0;
-  } else {
-    // ビデオが縦長 → 幅基準でフィット、上下がはみ出す
-    dispW = wR.width;
-    dispH = wR.width / videoAR;
-    offX  = 0;
-    offY  = (wR.height - dispH) / 2;  // 負の値（上下クロップ）
-  }
-
-  // ビデオコンテンツの画面上の基準点
-  const vOriginX = wR.left + offX;
-  const vOriginY = wR.top  + offY;
-  // Canvas変換係数（ビデオコンテンツ画面px → Canvasピクセル）
-  const sx = cw / dispW;
-  const sy = ch / dispH;
+  // canvas座標変換係数（vidR上のpxをcanvas pxへ）
+  const sx = cw / vidR.width;
+  const sy = ch / vidR.height;
 
   // 画面座標→Canvas座標の変換ヘルパー
   function toC(r){
     return {
-      x: (r.left - vOriginX) * sx,
-      y: (r.top  - vOriginY) * sy,
+      x: (r.left - vidR.left) * sx,
+      y: (r.top  - vidR.top)  * sy,
       w: r.width  * sx,
       h: r.height * sy
     };
