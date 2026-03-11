@@ -265,8 +265,6 @@ font-weight:800; color:#ffffff;
 text-align:center;
 white-space:pre-wrap;
 text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-display:flex; flex-direction:column; align-items:center; justify-content:center;
-height:100%;
 }
 .bb-free{
 color:#ffffff; font-weight:600;
@@ -514,7 +512,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
     position:fixed; top:calc(env(safe-area-inset-top,44px) + 10px); left:14px;
     z-index:20; line-height:1.3; pointer-events:none;
   ">
-    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v45</div>
+    <div style="font-size:13px; font-weight:800; color:#ffffff; letter-spacing:0.3px; text-shadow:0 1px 3px rgba(0,0,0,0.5);">📷 工事写真撮影アプリ v46</div>
   </div>
   <button class="hist-fab" onclick="showHistory()">📂 履歴</button>
   <button class="readme-fab" onclick="showReadme()">📖 使い方</button>
@@ -744,7 +742,7 @@ z-index:9999; opacity:0; transition:opacity 0.3s; white-space:nowrap; pointer-ev
 ```
 <!-- バージョン -->
 <div style="text-align:center;padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;">
-  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v45</div>
+  <div style="font-size:22px;font-weight:800;color:#ffffff;">📷 工事写真撮影アプリ v46</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">電子黒板付き工事写真帳</div>
 </div>
 
@@ -1097,6 +1095,7 @@ function refreshBlackboard(){
     badge.textContent = S.status;
     badge.style.fontSize = '16.5px';
     badge.style.lineHeight = '';
+    badge.style.whiteSpace = '';
   }
   badge.style.background = 'rgba(255,255,255,0.12)';
   badge.style.borderColor = 'rgba(255,255,255,0.7)';
